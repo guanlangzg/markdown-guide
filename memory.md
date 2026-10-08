@@ -27,3 +27,8 @@
    - Prism.js 渲染 Markdown 时会将加粗、斜体等内联文字包裹在 `<span class="token content">` 中；
    - 严禁将页面主容器类名命名为 `.content`，否则将污染代码高亮中的所有文本内容，产生巨大的块状背景覆盖与排版错位（表现为文字被大白块遮盖或所谓‘乱码’）；
    - 主内容容器统一使用 `.main-content-area`，并在 CSS 中对 `.demo-source .token.content` 做严格重置（`background: transparent !important; display: inline !important;`）。
+
+7. **GitHub 仓库与 GitHub Pages 部署信息**：
+   - GitHub 远程仓库：`https://github.com/guanlangzg/markdown-guide`
+   - GitHub Pages 在线站点：`https://guanlangzg.github.io/markdown-guide/`
+   - 部署分支与根路径：`main` 分支根目录 `/`，静态直连无需构建步骤。
