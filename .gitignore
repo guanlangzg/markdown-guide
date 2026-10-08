@@ -1,16 +1,19 @@
-# Logs
-*.log
-
 # OS files
 .DS_Store
 Thumbs.db
 
-# IDE
+# IDE & Editor
 .vscode/
 .idea/
 *.swp
 *.swo
 
+# Internal Agent & Test files
+AGENTS.md
+memory.md
+scripts/
+
 # Temporary files
 *.tmp
+*.log
 *~
