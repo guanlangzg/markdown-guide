@@ -865,18 +865,175 @@ button {
     color: #475569;
 }
 
+/* ==================== Mermaid 架构图与流程图工匠风适配 ==================== */
 .preview-content .mermaid {
     display: flex;
     justify-content: center;
-    background: #FFFFFF;
-    padding: var(--rhythm-3);
-    margin: 1em 0;
+    align-items: center;
+    background: #F8FAFC;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 24px 16px;
+    margin: 1.25em 0;
     overflow-x: auto;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
 }
 
 .preview-content .mermaid svg {
-    max-width: 100% !important;
-    height: auto !important;
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+/* 针对纵向单列流程图进行最大宽度控制，杜绝 SVG 强行撑满容器造成字体与边框等比过度放大失衡 */
+#mermaid-flow .preview-content .mermaid svg {
+    max-width: 330px;
+}
+
+/* Mermaid 节点内部文字排版优化与抗锯齿 */
+.preview-content .mermaid .node text,
+.preview-content .mermaid .node .nodeLabel {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    fill: #0F172A !important;
+}
+
+/* 节点精致圆角与边框 */
+.preview-content .mermaid .node rect,
+.preview-content .mermaid .node circle,
+.preview-content .mermaid .node ellipse,
+.preview-content .mermaid .node polygon {
+    stroke-width: 1.5px !important;
+}
+
+/* ==================== 高频速查表一键复制与精致排版 ==================== */
+.cheatsheet-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #F0F9FF;
+    border: 1px solid #BAE6FD;
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: #0369A1;
+    line-height: 1.5;
+}
+
+.cheatsheet-banner .banner-icon-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: #E0F2FE;
+    border-radius: 6px;
+    flex-shrink: 0;
+    color: #0284C7;
+}
+
+.cheatsheet-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 0 0 1.5em 0;
+}
+
+.cheatsheet-table thead th {
+    background: #F8FAFC;
+    color: #475569;
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.cheatsheet-table thead th.th-quick-copy {
+    text-align: center;
+    width: 96px;
+}
+
+.cheatsheet-table tbody tr {
+    transition: background-color 0.15s ease;
+}
+
+.cheatsheet-table tbody tr:hover {
+    background-color: #F8FAFC;
+}
+
+.cheatsheet-table tbody td {
+    padding: 9px 12px;
+    font-size: 13.5px;
+    border-bottom: 1px solid #F1F5F9;
+    vertical-align: middle;
+}
+
+.cheatsheet-table tbody td.td-quick-copy {
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* 单元格一键复制按钮 */
+.table-copy-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 4px 9px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #475569;
+    background: #FFFFFF;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+    line-height: 1;
+}
+
+.table-copy-btn:hover {
+    color: #0F172A;
+    background: #F8FAFC;
+    border-color: #CBD5E1;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.table-copy-btn:active {
+    transform: scale(0.97);
+}
+
+.table-copy-btn.copied {
+    color: #059669;
+    background: #ECFDF5;
+    border-color: #A7F3D0;
+    box-shadow: none;
+}
+
+.table-copy-btn.copied svg {
+    color: #059669;
+}
+
+/* 第二列代码点击复制增强 */
+.copyable-code-badge {
+    cursor: pointer !important;
+    position: relative;
+    transition: all 0.15s ease;
+}
+
+.copyable-code-badge:hover {
+    background: #EFF6FF !important;
+    color: #0284C7 !important;
+    border-color: #BFDBFE !important;
+}
+
+.copyable-code-badge.code-copied {
+    background: #ECFDF5 !important;
+    color: #059669 !important;
+    border-color: #A7F3D0 !important;
 }
 
 /* 数学公式容器排版美化 */

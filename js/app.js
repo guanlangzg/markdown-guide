@@ -1,12 +1,60 @@
 // ==================== 全局状态 ====================
 const state = {
-    currentSection: 'heading',
+    currentSection: 'cheatsheet',
     searchIndex: {},
+};
+
+// 高频速查表各语法功能一键复制的开箱即用标准模板
+const CHEATSHEET_SNIPPETS = {
+    '标题': '# 一级标题\n## 二级标题\n### 三级标题',
+    '粗体': '**加粗文本**',
+    '斜体': '*斜体文本*',
+    '删除线': '~~删除文字~~',
+    '行内代码': '`行内代码`',
+    '无序列表': '- 列表项目 1\n- 列表项目 2',
+    '有序列表': '1. 第一项\n2. 第二项',
+    '任务清单': '- [ ] 待办事项\n- [x] 已完成事项',
+    '引用块': '> 引用段落内容',
+    '分割线': '---',
+    '超级链接': '[链接说明文本](https://example.com)',
+    '插入图片': '![图片替代文本](https://example.com/image.png)',
+    '数据表格': '| 表头 1 | 表头 2 |\n| :--- | :--- |\n| 内容 1 | 内容 2 |',
+    '行内公式': '$E = mc^2$',
+    '代码块': '```cpp\n#include <iostream>\n\nint main() {\n    return 0;\n}\n```'
 };
 
 // ==================== 增强内容数据 (增加分类、场景标签与语法精要) ====================
 const contentData = {
-    // 🔥 高频语法 (15项)
+    // 🔥 高频语法 (16项 - 速查表置顶 + 15项基础语法)
+    'cheatsheet': {
+        title: '高频速查表',
+        category: '🔥 高频语法',
+        scenario: '极速记忆 · 终极浓缩',
+        syntax: '15大核心语法一览',
+        markdown: `| 语法功能 | Markdown 源码写法 | 渲染示例 |
+| :--- | :--- | :--- |
+| **标题** | \`# H1\` / \`## H2\` / \`### H3\` | 1-6 级标题 |
+| **粗体** | \`**加粗文本**\` | **加粗文本** |
+| **斜体** | \`*斜体文本*\` | *斜体文本* |
+| **删除线** | \`~~删除文字~~\` | ~~删除文字~~ |
+| **行内代码** | \`\` \`code\` \`\` | \`code\` |
+| **无序列表** | \`- 列表项目\` | • 列表项目 |
+| **有序列表** | \`1. 列表项目\` | 1. 列表项目 |
+| **任务清单** | \`- [ ] 待办\` / \`- [x] 完成\` | ☑ 任务项 |
+| **引用块** | \`> 引用段落\` | 边框引用 |
+| **分割线** | \`---\` | 横向细线 |
+| **超级链接** | \`[文本](https://...)\` | 可点击链接 |
+| **插入图片** | \`![说明](路径)\` | 嵌入式图像 |
+| **数据表格** | \`\\| 表头1 \\| 表头2 \\|\` | 栅格数据表 |
+| **行内公式** | \`$E = mc^2$\` | 数学符号 |
+| **代码块** | \`\`\`cpp ... \`\`\` | 多语言高亮代码 |`,
+        tips: `<strong>💡 记忆建议：</strong>
+<ul>
+    <li>本表中整理的 15 个语法规则覆盖日常 90% 以上的技术记录需求</li>
+    <li>支持直接点击表格每行右侧的「复制」按钮获取对应标准语法模板</li>
+    <li>其余 Mermaid、折叠、混用等中频语法按需在左侧导航速查即可</li>
+</ul>`
+    },
     'heading': {
         title: '标题',
         category: '🔥 高频语法',
@@ -325,13 +373,13 @@ $$`,
         syntax: '```mermaid flowchart TD',
         markdown: `\`\`\`mermaid
 flowchart TD
-    A[开始: 输入图结构] --> B[初始化信息素与参数]
+    A([开始: 输入图结构]) --> B[初始化信息素与参数]
     B --> C[蚂蚁并发构建闭环路径]
     C --> D[局部启发式搜索增强]
     D --> E[全局信息素更新与挥发]
-    E --> F{是否达到最大迭代代数?}
+    E --> F{达到最大迭代代数?}
     F -- 否 --> C
-    F -- 是 --> G[输出全局最优路径]
+    F -- 是 --> G([输出全局最优路径])
 \`\`\``,
         tips: `<strong>💡 适用平台：</strong>
 <ul>
@@ -627,34 +675,6 @@ Thread 4 "main" received signal SIGSEGV, Segmentation fault.
 <ul>
     <li>Markdown 的初衷是“让纯文本具备良好的可读性”，排版应以阅读舒适为最高准则</li>
 </ul>`
-    },
-    'cheatsheet': {
-        title: '高频速查表',
-        category: '🔧 实用指南',
-        scenario: '极速记忆 · 终极浓缩',
-        syntax: '15大核心语法一览',
-        markdown: `| 语法功能 | Markdown 源码写法 | 渲染示例 |
-| :--- | :--- | :--- |
-| **标题** | \`# H1\` / \`## H2\` / \`### H3\` | 1-6 级标题 |
-| **粗体** | \`**加粗文本**\` | **加粗文本** |
-| **斜体** | \`*斜体文本*\` | *斜体文本* |
-| **删除线** | \`~~删除文字~~\` | ~~删除文字~~ |
-| **行内代码** | \`\` \`code\` \`\` | \`code\` |
-| **无序列表** | \`- 列表项目\` | • 列表项目 |
-| **有序列表** | \`1. 列表项目\` | 1. 列表项目 |
-| **任务清单** | \`- [ ] 待办\` / \`- [x] 完成\` | ☑ 任务项 |
-| **引用块** | \`> 引用段落\` | 边框引用 |
-| **分割线** | \`---\` | 横向细线 |
-| **超级链接** | \`[文本](https://...)\` | 可点击链接 |
-| **插入图片** | \`![说明](路径)\` | 嵌入式图像 |
-| **数据表格** | \`| 表头1 | 表头2 |\` | 栅格数据表 |
-| **行内公式** | \`$E = mc^2$\` | 数学符号 |
-| **代码块** | \`\`\`cpp ... \`\`\` | 多语言高亮代码 |`,
-        tips: `<strong>💡 记忆建议：</strong>
-<ul>
-    <li>本表中整理的 15 个语法规则覆盖日常 90% 以上的技术记录需求</li>
-    <li>其余 Mermaid、折叠、混用等中频语法按需速查即可</li>
-</ul>`
     }
 };
 
@@ -670,8 +690,8 @@ document.addEventListener('DOMContentLoaded', () => {
     renderAllContent();
     initGlobalShortcuts();
     
-    // 默认展示第一个语法卡片
-    showContent('heading');
+    // 默认展示高频速查卡片 (置顶首项)
+    showContent('cheatsheet');
 });
 
 // 初始化全局图片加载错误防御 (捕获阶段监听非冒泡 error 事件)
@@ -683,14 +703,41 @@ function initImageErrorHandler() {
     }, true);
 }
 
-// 初始化 Mermaid 图表引擎
+// 初始化 Mermaid 图表引擎 (现代工匠风配色与紧凑优雅排版)
 function initMermaid() {
     if (typeof mermaid !== 'undefined') {
         mermaid.initialize({
             startOnLoad: false,
-            theme: 'default',
-            securityLevel: 'loose',
-            fontFamily: 'Inter, -apple-system, sans-serif'
+            theme: 'base',
+            themeVariables: {
+                fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                fontSize: '13px',
+                primaryColor: '#F8FAFC',
+                primaryBorderColor: '#64748B',
+                primaryTextColor: '#0F172A',
+                lineColor: '#64748B',
+                secondaryColor: '#F1F5F9',
+                tertiaryColor: '#FFFFFF',
+                mainBkg: '#FFFFFF',
+                nodeBorder: '#64748B',
+                clusterBkg: '#F8FAFC',
+                clusterBorder: '#CBD5E1',
+                defaultLinkColor: '#64748B',
+                edgeLabelBackground: '#FFFFFF',
+                actorBkg: '#F8FAFC',
+                actorBorder: '#64748B',
+                actorTextColor: '#0F172A',
+                signalColor: '#64748B',
+                signalTextColor: '#334155'
+            },
+            flowchart: {
+                htmlLabels: true,
+                curve: 'basis',
+                nodeSpacing: 24,
+                rankSpacing: 28,
+                padding: 10
+            },
+            securityLevel: 'loose'
         });
     }
 }
@@ -834,6 +881,79 @@ function createContentItem(id, data) {
     div.querySelectorAll('pre code').forEach(block => {
         Prism.highlightElement(block);
     });
+    
+    // 针对高频速查表增强：为每个语法功能注入独立一键复制能力与说明横幅
+    if (id === 'cheatsheet') {
+        const previewContent = div.querySelector('.preview-content');
+        const table = previewContent ? previewContent.querySelector('table') : null;
+        if (table) {
+            table.classList.add('cheatsheet-table');
+            
+            // 插入速查横幅提示
+            const banner = document.createElement('div');
+            banner.className = 'cheatsheet-banner';
+            banner.innerHTML = `
+                <div class="banner-icon-wrap">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+                </div>
+                <span><strong>快捷操作</strong>：点击每行右侧「复制」按钮或点击代码标签，即可直接复制开箱即用的 Markdown 语法代码。</span>
+            `;
+            table.parentNode.insertBefore(banner, table);
+            
+            // 增强表头
+            const theadTr = table.querySelector('thead tr');
+            if (theadTr) {
+                const th = document.createElement('th');
+                th.className = 'th-quick-copy';
+                th.textContent = '快捷操作';
+                theadTr.appendChild(th);
+            }
+            
+            // 增强每一行
+            table.querySelectorAll('tbody tr').forEach(tr => {
+                const cells = tr.querySelectorAll('td');
+                if (cells.length >= 2) {
+                    const rawName = cells[0].textContent.trim();
+                    const snippetKey = Object.keys(CHEATSHEET_SNIPPETS).find(k => rawName.includes(k)) || rawName;
+                    const snippet = CHEATSHEET_SNIPPETS[snippetKey] || cells[1].textContent.trim();
+                    
+                    // 使第二列中的代码可点击复制
+                    cells[1].querySelectorAll('code').forEach(codeEl => {
+                        codeEl.classList.add('copyable-code-badge');
+                        codeEl.title = `点击复制: ${codeEl.textContent.trim()}`;
+                        codeEl.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            copyToClipboard(codeEl.textContent.trim(), codeEl);
+                        });
+                    });
+                    
+                    const td = document.createElement('td');
+                    td.className = 'td-quick-copy';
+                    
+                    const copyBtn = document.createElement('button');
+                    copyBtn.className = 'table-copy-btn';
+                    copyBtn.title = `一键复制「${snippetKey}」语法模板`;
+                    copyBtn.innerHTML = `
+                        <svg class="copy-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        <span class="btn-text">复制</span>
+                    `;
+                    
+                    copyBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        copyToClipboard(snippet, copyBtn);
+                    });
+                    
+                    td.appendChild(copyBtn);
+                    tr.appendChild(td);
+                }
+            });
+        }
+    }
     
     // 绑定一键复制功能
     div.querySelector('.copy-btn').addEventListener('click', (e) => {
@@ -1231,13 +1351,51 @@ function initGlobalShortcuts() {
 
 // ==================== 一键复制到剪贴板 ====================
 function copyToClipboard(text, button) {
-    navigator.clipboard.writeText(text).then(() => {
+    const doCopy = () => {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            return navigator.clipboard.writeText(text);
+        } else {
+            return new Promise((resolve, reject) => {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    resolve();
+                } catch (e) {
+                    document.body.removeChild(textarea);
+                    reject(e);
+                }
+            });
+        }
+    };
+
+    doCopy().then(() => {
+        if (!button) return;
+        
+        // 如果是点击行内 code 徽章触发复制
+        if (button.tagName === 'CODE') {
+            const originalText = button.textContent;
+            button.classList.add('code-copied');
+            button.textContent = '✓ 已复制';
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.classList.remove('code-copied');
+            }, 1800);
+            return;
+        }
+
+        // 普通按钮或表格专属复制按钮
         const originalHTML = button.innerHTML;
         button.innerHTML = `
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="20 6 9 17 4 12"></polyline>
             </svg>
-            <span>已复制!</span>
+            <span class="btn-text">已复制!</span>
         `;
         button.classList.add('copied');
         
@@ -1247,7 +1405,6 @@ function copyToClipboard(text, button) {
         }, 2000);
     }).catch(err => {
         console.error('复制失败:', err);
-        alert('复制失败，请手动选中文本复制');
     });
 }
 
