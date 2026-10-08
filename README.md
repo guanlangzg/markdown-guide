@@ -16,13 +16,13 @@
 
 ### 在线访问
 
-直接访问 GitHub Pages：[https://yourusername.github.io/markdown-guide/](https://yourusername.github.io/markdown-guide/)
+🌐 **GitHub Pages 在线访问地址**：[https://guanlangzg.github.io/markdown-guide/](https://guanlangzg.github.io/markdown-guide/)
 
 ### 本地使用
 
 1. 克隆仓库：
 ```bash
-git clone https://github.com/yourusername/markdown-guide.git
+git clone https://github.com/guanlangzg/markdown-guide.git
 cd markdown-guide
 ```
 
