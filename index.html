@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown 语法速查手册 | 博客写作与学术笔记指南</title>
+    
+    <!-- 引入专业技术字体：Inter (UI) 与 JetBrains Mono (代码) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="./css/style.css">
+    
+    <!-- KaTeX 数学公式样式 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="logo-container">
+                <div class="logo-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                </div>
+                <span class="logo-text">
+                    Markdown 速查手册
+                </span>
+            </a>
+            <div class="header-actions">
+                <div class="search-box" id="searchBoxTrigger" title="点击或按 Ctrl+K 搜索语法">
+                    <span class="search-icon">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </span>
+                    <input type="text" id="searchInput" placeholder="搜索语法或使用场景..." readonly />
+                    <span class="search-shortcut"><kbd>Ctrl</kbd><kbd>K</kbd></span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主体区域 -->
+    <div class="main-container">
+        <!-- 左侧导航 -->
+        <aside class="sidebar" id="sidebar">
+            <nav class="nav-menu">
+                <!-- 🔥 高频语法 -->
+                <div class="nav-section">
+                    <div class="nav-section-header" data-section="frequent">
+                        <div class="nav-section-title-wrap">
+                            <span class="nav-section-icon">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
+                                </svg>
+                            </span>
+                            <span>高频语法</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <span class="nav-count-badge">15</span>
+                            <svg class="toggle-icon-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                    <ul class="nav-list active" id="frequent-list">
+                        <li data-id="heading" class="active">标题</li>
+                        <li data-id="text-format">粗体/斜体/删除线</li>
+                        <li data-id="inline-code">行内代码</li>
+                        <li data-id="code-block">代码块</li>
+                        <li data-id="unordered-list">无序列表</li>
+                        <li data-id="ordered-list">有序列表</li>
+                        <li data-id="nested-list">多级列表</li>
+                        <li data-id="task-list">任务列表</li>
+                        <li data-id="quote">引用</li>
+                        <li data-id="link">链接</li>
+                        <li data-id="image">图片</li>
+                        <li data-id="table">表格</li>
+                        <li data-id="divider">分割线</li>
+                        <li data-id="math">数学公式</li>
+                        <li data-id="escape">转义字符</li>
+                    </ul>
+                </div>
+
+                <!-- 📚 中频语法 -->
+                <div class="nav-section">
+                    <div class="nav-section-header" data-section="medium">
+                        <div class="nav-section-title-wrap">
+                            <span class="nav-section-icon" style="color: #6366F1;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                                </svg>
+                            </span>
+                            <span>中频语法</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <span class="nav-count-badge">8</span>
+                            <svg class="toggle-icon-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                    <ul class="nav-list" id="medium-list">
+                        <li data-id="table-align">表格对齐</li>
+                        <li data-id="table-special">表格特殊字符</li>
+                        <li data-id="mermaid-flow">Mermaid 流程图</li>
+                        <li data-id="mermaid-advanced">Mermaid 时序图/状态图</li>
+                        <li data-id="collapse">折叠内容</li>
+                        <li data-id="footnote">脚注</li>
+                        <li data-id="ref-link">引用式链接</li>
+                        <li data-id="html-mix">HTML 混用</li>
+                    </ul>
+                </div>
+
+                <!-- 🔧 实用指南 -->
+                <div class="nav-section">
+                    <div class="nav-section-header" data-section="guide">
+                        <div class="nav-section-title-wrap">
+                            <span class="nav-section-icon" style="color: #10B981;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                                </svg>
+                            </span>
+                            <span>实用指南</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <span class="nav-count-badge">6</span>
+                            <svg class="toggle-icon-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                    <ul class="nav-list" id="guide-list">
+                        <li data-id="template-tech">技术笔记模板</li>
+                        <li data-id="template-paper">论文阅读模板</li>
+                        <li data-id="template-bug">Bug 调试模板</li>
+                        <li data-id="best-practice">重点标记体系</li>
+                        <li data-id="dos-donts">推荐/不推荐写法</li>
+                        <li data-id="cheatsheet">高频速查表</li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- 移动端浮动导航按钮 -->
+        <button class="sidebar-toggle" id="sidebarToggle" aria-label="切换侧边栏导航">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+
+        <!-- 右侧内容区 (由 JS 统一注入) -->
+        <main class="main-content-area" id="content">
+            <!-- 动态生成 29 个语法与模板卡片 -->
+        </main>
+    </div>
+
+    <!-- 实时演练编辑弹窗 -->
+    <div class="modal" id="editModal" role="dialog" aria-modal="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                    实时演练编辑器
+                </h3>
+                <button class="modal-close" id="modalClose" aria-label="关闭">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="editor-container">
+                    <div class="editor-pane">
+                        <div class="pane-header">
+                            <span>Markdown 输入区 (Dark Slate)</span>
+                        </div>
+                        <textarea id="editorInput" placeholder="在此输入 Markdown..."></textarea>
+                    </div>
+                    <div class="editor-pane">
+                        <div class="pane-header">
+                            <span>实时渲染预览 (Paper White)</span>
+                        </div>
+                        <div id="editorPreview" class="preview-content"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="clearBtn" class="btn-secondary">清空输入</button>
+                <button id="closeEditorBtn" class="btn-primary">完成并关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 全局搜索弹窗 (Spotlight Search) -->
+    <div class="modal" id="searchModal" role="dialog" aria-modal="true">
+        <div class="modal-content search-modal">
+            <div class="modal-header">
+                <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="modalSearchInput" placeholder="输入关键字搜索标题、代码或语法建议..." style="width: 100%; border: none; outline: none; font-size: 15px; font-family: inherit; color: #0F172A;" />
+                </div>
+                <button class="modal-close" id="searchModalClose" aria-label="关闭">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body" style="max-height: 480px; overflow-y: auto;">
+                <div id="searchResults"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 依赖库 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markdown.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    
+    <script src="./js/app.js"></script>
+</body>
+</html>
