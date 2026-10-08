@@ -11,7 +11,10 @@ Thumbs.db
 # Internal Agent & Test files
 AGENTS.md
 memory.md
-scripts/
+scripts/*
+!scripts/test/
+scripts/test/*
+!scripts/test/test-guide-ux.py
 
 # Temporary files
 *.tmp

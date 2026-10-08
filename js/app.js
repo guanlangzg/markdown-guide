@@ -2,6 +2,7 @@
 const state = {
     currentSection: 'cheatsheet',
     searchIndex: {},
+    modalReturnFocus: null,
 };
 
 // 高频速查表各语法功能一键复制的开箱即用标准模板
@@ -689,9 +690,9 @@ document.addEventListener('DOMContentLoaded', () => {
     buildSearchIndex();
     renderAllContent();
     initGlobalShortcuts();
-    
-    // 默认展示高频速查卡片 (置顶首项)
-    showContent('cheatsheet');
+    window.addEventListener('hashchange', () => showContentFromHash());
+
+    showContentFromHash();
 });
 
 // 初始化全局图片加载错误防御 (捕获阶段监听非冒泡 error 事件)
@@ -742,40 +743,56 @@ function initMermaid() {
     }
 }
 
+function setSidebarOpen(open) {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('active', open);
+    sidebar.inert = !open && window.innerWidth <= 768;
+    document.getElementById('sidebarToggle').setAttribute('aria-expanded', String(open));
+}
+
+function setSectionOpen(header, open) {
+    document.getElementById(header.getAttribute('aria-controls')).classList.toggle('active', open);
+    header.classList.toggle('active', open);
+    header.setAttribute('aria-expanded', String(open));
+}
+
+function showContentFromHash() {
+    const id = window.location.hash.slice(1);
+    showContent(Object.prototype.hasOwnProperty.call(contentData, id) ? id : 'cheatsheet');
+}
+
 // ==================== 导航系统 ====================
 function initNavigation() {
-    // 手风琴折叠交互
     document.querySelectorAll('.nav-section-header').forEach(header => {
         header.addEventListener('click', () => {
-            const section = header.dataset.section;
-            const list = document.getElementById(`${section}-list`);
-            const isActive = list.classList.contains('active');
-            
-            list.classList.toggle('active', !isActive);
-            header.classList.toggle('active', !isActive);
+            setSectionOpen(header, header.getAttribute('aria-expanded') !== 'true');
         });
     });
-    
-    // 导航项点击切换
-    document.querySelectorAll('.nav-list li').forEach(item => {
-        item.addEventListener('click', () => {
-            const id = item.dataset.id;
-            showContent(id);
-            
-            // 更新侧边栏高亮状态
-            document.querySelectorAll('.nav-list li').forEach(li => li.classList.remove('active'));
-            item.classList.add('active');
-            
-            // 移动端自动收起侧边栏抽屉
+
+    document.querySelectorAll('.nav-list a').forEach(link => {
+        link.addEventListener('click', (event) => {
+            event.preventDefault();
+            const id = link.closest('li').dataset.id;
+            if (window.location.hash === `#${id}`) {
+                showContent(id);
+            } else {
+                window.location.hash = id;
+            }
             if (window.innerWidth <= 768) {
-                document.getElementById('sidebar')?.classList.remove('active');
+                setSidebarOpen(false);
+                document.getElementById('sidebarToggle').focus();
             }
         });
     });
-    
-    // 移动端汉堡菜单切换
-    document.getElementById('sidebarToggle')?.addEventListener('click', () => {
-        document.getElementById('sidebar')?.classList.toggle('active');
+
+    document.getElementById('sidebarToggle').addEventListener('click', () => {
+        setSidebarOpen(!document.getElementById('sidebar').classList.contains('active'));
+    });
+
+    setSidebarOpen(document.getElementById('sidebar').classList.contains('active'));
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) setSidebarOpen(false);
+        else setSidebarOpen(document.getElementById('sidebar').classList.contains('active'));
     });
 }
 
@@ -796,6 +813,7 @@ function createContentItem(id, data) {
     const div = document.createElement('div');
     div.className = 'content-item';
     div.id = id;
+    if (id === 'cheatsheet') div.classList.add('cheatsheet-item');
     
     // 自定义 marked 渲染器，对 mermaid 代码块进行特别包装
     const rawHtml = parseMarkdown(data.markdown);
@@ -884,6 +902,13 @@ function createContentItem(id, data) {
     
     // 针对高频速查表增强：为每个语法功能注入独立一键复制能力与说明横幅
     if (id === 'cheatsheet') {
+        const source = div.querySelector('.demo-source');
+        const sourceDetails = document.createElement('details');
+        sourceDetails.className = 'cheatsheet-source';
+        sourceDetails.innerHTML = '<summary>查看完整 Markdown 表格源码</summary>';
+        source.replaceWith(sourceDetails);
+        sourceDetails.appendChild(source);
+
         const previewContent = div.querySelector('.preview-content');
         const table = previewContent ? previewContent.querySelector('table') : null;
         if (table) {
@@ -902,6 +927,19 @@ function createContentItem(id, data) {
             `;
             table.parentNode.insertBefore(banner, table);
             
+            const columnLabels = [...table.querySelectorAll('thead th')].map(th => th.textContent.trim());
+            table.querySelectorAll('tbody tr').forEach(row => {
+                row.querySelectorAll('td').forEach((cell, index) => {
+                    cell.dataset.label = columnLabels[index];
+                    if (index === 1 || index === 2) {
+                        const label = document.createElement('span');
+                        label.className = 'mobile-cell-label';
+                        label.textContent = columnLabels[index];
+                        cell.prepend(label);
+                    }
+                });
+            });
+
             // 增强表头
             const theadTr = table.querySelector('thead tr');
             if (theadTr) {
@@ -921,16 +959,21 @@ function createContentItem(id, data) {
                     
                     // 使第二列中的代码可点击复制
                     cells[1].querySelectorAll('code').forEach(codeEl => {
-                        codeEl.classList.add('copyable-code-badge');
-                        codeEl.title = `点击复制: ${codeEl.textContent.trim()}`;
-                        codeEl.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            copyToClipboard(codeEl.textContent.trim(), codeEl);
+                        const copyBadge = document.createElement('button');
+                        copyBadge.type = 'button';
+                        copyBadge.className = 'copyable-code-badge';
+                        copyBadge.title = `点击复制: ${codeEl.textContent.trim()}`;
+                        copyBadge.setAttribute('aria-label', `复制 ${codeEl.textContent.trim()}`);
+                        copyBadge.innerHTML = codeEl.outerHTML;
+                        codeEl.replaceWith(copyBadge);
+                        copyBadge.addEventListener('click', () => {
+                            copyToClipboard(copyBadge.querySelector('code').textContent.trim(), copyBadge);
                         });
                     });
                     
                     const td = document.createElement('td');
                     td.className = 'td-quick-copy';
+                    td.dataset.label = '快捷操作';
                     
                     const copyBtn = document.createElement('button');
                     copyBtn.className = 'table-copy-btn';
@@ -1097,6 +1140,18 @@ function showContent(id) {
     if (targetItem) {
         targetItem.classList.add('active');
         state.currentSection = id;
+
+        document.querySelectorAll('.nav-list li').forEach(item => {
+            const active = item.dataset.id === id;
+            item.classList.toggle('active', active);
+            if (active) {
+                item.querySelector('a').setAttribute('aria-current', 'page');
+                const list = item.closest('.nav-list');
+                setSectionOpen(document.querySelector(`[aria-controls="${list.id}"]`), true);
+            } else {
+                item.querySelector('a').removeAttribute('aria-current');
+            }
+        });
         
         // 渲染图表
         if (typeof mermaid !== 'undefined' && targetItem.querySelector('.mermaid')) {
@@ -1147,6 +1202,7 @@ function initEditor() {
 }
 
 function openEditor(initialText = '') {
+    if (document.getElementById('searchModal').classList.contains('active')) closeSearchModal();
     const modal = document.getElementById('editModal');
     const editorInput = document.getElementById('editorInput');
     const editorPreview = document.getElementById('editorPreview');
@@ -1170,7 +1226,9 @@ function openEditor(initialText = '') {
         }
     });
     
+    state.modalReturnFocus = document.activeElement;
     modal.classList.add('active');
+    editorInput.focus();
 }
 
 // ==================== 模态弹窗系统 ====================
@@ -1188,27 +1246,55 @@ function initModal() {
         if (e.target.id === 'searchModal') closeSearchModal();
     });
     
-    // 点击顶部搜索栏唤起搜索弹窗
     document.getElementById('searchBoxTrigger')?.addEventListener('click', openSearchModal);
-    document.getElementById('searchInput')?.addEventListener('focus', openSearchModal);
+    document.addEventListener('keydown', trapModalFocus);
+}
+
+function focusableModalElements(modal) {
+    return [...modal.querySelectorAll('button:not([disabled]), input:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])')]
+        .filter(element => element.getClientRects().length > 0);
+}
+
+function trapModalFocus(event) {
+    if (event.key !== 'Tab') return;
+    const modal = document.querySelector('.modal.active');
+    if (!modal) return;
+    const elements = focusableModalElements(modal);
+    if (!elements.length) return;
+    const first = elements[0];
+    const last = elements[elements.length - 1];
+    if (event.shiftKey && (document.activeElement === first || !modal.contains(document.activeElement))) {
+        event.preventDefault();
+        last.focus();
+    } else if (!event.shiftKey && (document.activeElement === last || !modal.contains(document.activeElement))) {
+        event.preventDefault();
+        first.focus();
+    }
+}
+
+function restoreModalFocus() {
+    if (state.modalReturnFocus?.isConnected) state.modalReturnFocus.focus();
+    state.modalReturnFocus = null;
 }
 
 function closeEditModal() {
     document.getElementById('editModal')?.classList.remove('active');
+    restoreModalFocus();
 }
 
 function openSearchModal() {
+    if (document.getElementById('editModal').classList.contains('active')) return;
     const modal = document.getElementById('searchModal');
     const input = document.getElementById('modalSearchInput');
+    state.modalReturnFocus = document.activeElement;
     modal?.classList.add('active');
-    setTimeout(() => {
-        input?.focus();
-        input?.select();
-    }, 50);
+    input?.focus();
+    input?.select();
 }
 
 function closeSearchModal() {
     document.getElementById('searchModal')?.classList.remove('active');
+    restoreModalFocus();
 }
 
 // ==================== 全局搜索功能 ====================
@@ -1291,37 +1377,24 @@ function displaySearchResults(results, query) {
     }
     
     searchResults.innerHTML = results.map(result => `
-        <div class="search-result-item" data-id="${result.id}">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+        <button class="search-result-item" type="button" data-id="${result.id}">
+            <span class="search-result-heading">
                 <span class="search-result-title">${escapeHtml(result.title)}</span>
-                <span style="font-size: 11px; color: #0284C7; background: #E0F2FE; padding: 1px 6px; border-radius: 4px;">${escapeHtml(result.scenario || '')}</span>
-            </div>
-            <div class="search-result-snippet">${result.snippet}</div>
-        </div>
+                <span class="search-result-scenario">${escapeHtml(result.scenario || '')}</span>
+            </span>
+            <span class="search-result-snippet">${result.snippet}</span>
+        </button>
     `).join('');
     
     searchResults.querySelectorAll('.search-result-item').forEach(item => {
         item.addEventListener('click', () => {
             const id = item.dataset.id;
-            showContent(id);
             closeSearchModal();
-            
-            // 同步侧边栏激活
-            document.querySelectorAll('.nav-list li').forEach(li => {
-                if (li.dataset.id === id) {
-                    li.classList.add('active');
-                    // 确保父级手风琴列表是展开状态
-                    const parentList = li.closest('.nav-list');
-                    if (parentList && !parentList.classList.contains('active')) {
-                        parentList.classList.add('active');
-                        const section = parentList.id.replace('-list', '');
-                        const header = document.querySelector(`.nav-section-header[data-section="${section}"]`);
-                        header?.classList.add('active');
-                    }
-                } else {
-                    li.classList.remove('active');
-                }
-            });
+            if (window.location.hash === `#${id}`) {
+                showContent(id);
+            } else {
+                window.location.hash = id;
+            }
         });
     });
 }

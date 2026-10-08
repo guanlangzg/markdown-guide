@@ -21,7 +21,7 @@
     /* 文本色阶 */
     --color-text-primary: #0F172A;     /* 主标题与核心文本 Slate 900 */
     --color-text-secondary: #475569;   /* 正文与次级文字 Slate 600 */
-    --color-text-tertiary: #94A3B8;    /* 辅助说明与占位符 Slate 400 */
+    --color-text-tertiary: #64748B;    /* 辅助说明与占位符 Slate 500 */
     
     /* 品牌主色：沉稳天青色 (Tech Sky/Cyan) */
     --color-accent: #0284C7;           /* Sky 600 */
@@ -108,8 +108,14 @@ button {
     font-family: inherit;
     cursor: pointer;
     border: none;
-    outline: none;
     background: transparent;
+}
+
+button:focus-visible,
+a:focus-visible,
+summary:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 3px;
 }
 
 /* ==================== 顶部导航栏 (Navbar) ==================== */
@@ -212,18 +218,11 @@ button {
     flex-shrink: 0;
 }
 
-#searchInput {
-    border: none;
-    background: transparent;
-    outline: none;
+.search-placeholder {
     font-size: var(--text-sm);
-    color: var(--color-text-primary);
-    width: 220px;
-    font-family: inherit;
-}
-
-#searchInput::placeholder {
     color: var(--color-text-tertiary);
+    width: 220px;
+    text-align: left;
 }
 
 .search-shortcut {
@@ -232,7 +231,7 @@ button {
     gap: 3px;
     font-size: 11px;
     font-weight: 500;
-    color: var(--color-text-tertiary);
+    color: var(--color-text-secondary);
     background: var(--color-bg-base);
     border: 1px solid var(--color-border);
     padding: 2px 6px;
@@ -292,7 +291,13 @@ button {
     font-weight: 700;
     letter-spacing: 0.04em;
     text-transform: uppercase;
+    text-align: left;
+    width: 100%;
     transition: background 0.15s ease;
+}
+
+.nav-section-header.active .toggle-icon-svg {
+    transform: rotate(180deg);
 }
 
 .nav-section-header:hover {
@@ -317,17 +322,19 @@ button {
     padding: 1px 6px;
     border-radius: var(--radius-full);
     background: var(--color-bg-subtle);
-    color: var(--color-text-tertiary);
+    color: var(--color-text-secondary);
     border: 1px solid var(--color-border);
+}
+
+.nav-section-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .toggle-icon-svg {
     color: var(--color-text-tertiary);
     transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.nav-section-header.active .toggle-icon-svg {
-    transform: rotate(90deg);
 }
 
 .nav-list {
@@ -351,12 +358,17 @@ button {
     font-weight: 500;
     color: var(--color-text-secondary);
     border-radius: var(--radius-sm);
-    cursor: pointer;
     transition: all 0.15s ease;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
     position: relative;
+}
+
+.nav-list a {
+    display: block;
+    padding: 8px 12px 8px 30px;
+    margin: -8px -12px -8px -30px;
+    border-radius: var(--radius-sm);
+    color: inherit;
+    text-decoration: none;
 }
 
 .nav-list li:hover {
@@ -592,6 +604,88 @@ button {
     flex: 1;
     overflow-x: auto;
     background: #FFFFFF;
+}
+
+/* ==================== 速查与对照区布局 ==================== */
+.demo-container {
+    align-items: start;
+}
+
+.demo-source,
+.demo-preview {
+    min-width: 0;
+}
+
+.cheatsheet-item .demo-container {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.cheatsheet-source > summary {
+    padding: 14px 18px;
+    color: var(--color-text-secondary);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: #FFFFFF;
+    list-style-position: inside;
+}
+
+.cheatsheet-source[open] {
+    margin-bottom: var(--rhythm-5);
+}
+
+.cheatsheet-source[open] > .demo-source {
+    margin-top: var(--rhythm-2);
+}
+
+.cheatsheet-item .demo-preview {
+    width: 100%;
+}
+
+.cheatsheet-table {
+    table-layout: fixed;
+}
+
+.cheatsheet-table th:first-child,
+.cheatsheet-table td:first-child {
+    width: 18%;
+}
+
+.cheatsheet-table th:nth-child(2),
+.cheatsheet-table td:nth-child(2) {
+    width: 38%;
+}
+
+.cheatsheet-table th:nth-child(3),
+.cheatsheet-table td:nth-child(3) {
+    width: 27%;
+}
+
+.cheatsheet-table th:last-child,
+.cheatsheet-table td:last-child {
+    width: 17%;
+}
+
+.cheatsheet-table .copyable-code-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0;
+    vertical-align: middle;
+}
+
+.cheatsheet-table .copyable-code-badge code {
+    display: inline-block;
+}
+
+.cheatsheet-table .td-quick-copy {
+    padding-right: 6px;
+    padding-left: 6px;
+}
+
+.cheatsheet-table .table-copy-btn {
+    padding: 5px 7px;
 }
 
 /* ==================== 操作按钮设计 ==================== */
@@ -1247,6 +1341,11 @@ button {
     overflow: hidden;
 }
 
+.search-modal {
+    width: 600px;
+    max-height: 80vh;
+}
+
 @keyframes modalPop {
     from { opacity: 0; transform: scale(0.96) translateY(10px); }
     to { opacity: 1; transform: scale(1) translateY(0); }
@@ -1385,11 +1484,6 @@ button {
 }
 
 /* 搜索结果弹窗 (Spotlight Search Modal) */
-.search-modal {
-    width: 600px;
-    max-height: 80vh;
-}
-
 #searchResults {
     display: flex;
     flex-direction: column;
@@ -1397,6 +1491,9 @@ button {
 }
 
 .search-result-item {
+    display: block;
+    width: 100%;
+    text-align: left;
     padding: 12px 16px;
     background: #FFFFFF;
     border: 1px solid var(--color-border);
@@ -1411,16 +1508,34 @@ button {
     transform: translateY(-1px);
 }
 
+.search-result-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--rhythm-2);
+    margin-bottom: 4px;
+}
+
 .search-result-title {
     font-weight: 600;
     font-size: var(--text-sm);
     color: var(--color-text-primary);
-    margin-bottom: 4px;
+}
+
+.search-result-scenario {
+    flex-shrink: 0;
+    color: var(--color-accent-hover);
+    background: var(--color-accent-light);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: var(--text-xs);
 }
 
 .search-result-snippet {
     font-size: var(--text-xs);
     color: var(--color-text-secondary);
+    display: block;
+    text-align: left;
     line-height: 1.5;
 }
 
@@ -1489,17 +1604,136 @@ button {
     .main-content-area {
         padding: var(--rhythm-4);
     }
+
+    .search-modal {
+        width: 90vw;
+        max-height: 80vh;
+    }
+
+    .cheatsheet-table thead {
+        display: none;
+    }
+
+    .cheatsheet-table,
+    .cheatsheet-table tbody {
+        display: block;
+    }
+
+    .cheatsheet-table tbody tr {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas:
+            "name copy"
+            "syntax syntax"
+            "render render";
+        gap: 0 12px;
+        margin-bottom: 10px;
+        padding: 12px;
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        background: #FFFFFF;
+        box-shadow: var(--shadow-xs);
+    }
+
+    .cheatsheet-table tbody tr::before {
+        content: none;
+    }
+
+    .cheatsheet-table tbody td {
+        display: block;
+        width: auto;
+        min-width: 0;
+        max-width: none;
+        padding: 7px 0;
+        font-size: var(--text-sm);
+        overflow-wrap: anywhere;
+        border: 0;
+        border-bottom: 1px solid var(--color-border-subtle);
+        vertical-align: top;
+    }
+
+    .cheatsheet-table tbody td:first-child {
+        grid-area: name;
+        align-self: center;
+        padding: 0;
+        border-bottom: 0;
+        color: var(--color-text-primary);
+        font-size: var(--text-md);
+        font-weight: 600;
+    }
+
+    .cheatsheet-table tbody td:nth-child(2) {
+        grid-area: syntax;
+    }
+
+    .cheatsheet-table tbody td:nth-child(3) {
+        grid-area: render;
+        border-bottom: 0;
+    }
+
+    .mobile-cell-label {
+        display: block;
+        margin-bottom: 4px;
+        color: var(--color-text-tertiary);
+        font-size: var(--text-xs);
+        font-weight: 600;
+    }
+
+    .cheatsheet-table tbody td:nth-child(2) .mobile-cell-label {
+        font-size: 0;
+    }
+
+    .cheatsheet-table tbody td:nth-child(2) .mobile-cell-label::after {
+        content: "Markdown 写法";
+        font-size: var(--text-xs);
+    }
+
+    .cheatsheet-table tbody td:nth-child(2)::before,
+    .cheatsheet-table tbody td:nth-child(3)::before {
+        content: none;
+    }
+
+    .cheatsheet-table tbody td.td-quick-copy {
+        grid-area: copy;
+        align-self: center;
+        padding: 0;
+        border: 0;
+    }
+
+    .cheatsheet-table .copyable-code-badge {
+        overflow-wrap: anywhere;
+    }
     
     .header-content {
         padding: 0 var(--rhythm-4);
+        gap: 8px;
     }
-    
-    #searchInput {
-        width: 140px;
+
+    .logo-container {
+        min-width: 0;
+        gap: 8px;
     }
-    
+
+    .logo-text {
+        white-space: nowrap;
+        font-size: 14px;
+    }
+
+    .search-box {
+        gap: 6px;
+        padding: 6px 8px;
+    }
+
     .search-shortcut {
         display: none;
+    }
+
+    .search-placeholder {
+        width: auto;
+        max-width: min(48vw, 180px);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
     
     .editor-container {
