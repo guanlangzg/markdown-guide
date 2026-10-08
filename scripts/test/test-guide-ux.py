@@ -72,12 +72,24 @@ class GuideExperienceTests(unittest.TestCase):
         self.assertFalse(page.locator('#cheatsheet .cheatsheet-source').evaluate('el => el.open'))
         self.assertLessEqual(page.evaluate('document.documentElement.scrollWidth'), 390)
         self.assertEqual(first_row.evaluate('el => getComputedStyle(el).display'), 'grid')
-        self.assertEqual(first_row.locator('td:nth-child(2)').locator('.mobile-cell-label').inner_text(), 'Markdown 源码写法')
-        self.assertEqual(first_row.locator('td:nth-child(3)').locator('.mobile-cell-label').inner_text(), '渲染示例')
+        self.assertEqual(first_row.locator('td:nth-child(2)').locator('.mobile-cell-label').inner_text(), '写法')
+        self.assertEqual(first_row.locator('td:nth-child(3)').locator('.mobile-cell-label').inner_text(), '效果')
         summary = page.locator('.cheatsheet-source > summary')
         self.assertTrue(summary.is_visible())
         summary.click()
         self.assertTrue(page.locator('.cheatsheet-source').evaluate('el => el.open'))
+
+    def test_cheatsheet_labels_only_show_on_mobile(self):
+        page = self.open_page()
+        table = page.locator('#cheatsheet .cheatsheet-table')
+        self.assertEqual(table.locator('thead th').nth(1).inner_text(), 'Markdown 源码写法')
+        self.assertFalse(table.locator('.mobile-cell-label').first.is_visible())
+
+        page.set_viewport_size({'width': 390, 'height': 844})
+        labels = table.locator('.mobile-cell-label')
+        self.assertTrue(labels.first.is_visible())
+        self.assertEqual(labels.nth(0).inner_text(), '写法')
+        self.assertEqual(labels.nth(1).inner_text(), '效果')
 
     def test_deep_link_and_browser_history_restore_selection(self):
         page = self.open_page('#math')

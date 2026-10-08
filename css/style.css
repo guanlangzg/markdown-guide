@@ -1045,6 +1045,10 @@ summary:focus-visible {
     border-bottom: 1px solid var(--color-border);
 }
 
+.cheatsheet-table .mobile-cell-label {
+    display: none;
+}
+
 .cheatsheet-table thead th.th-quick-copy {
     text-align: center;
     width: 96px;
@@ -1671,21 +1675,12 @@ summary:focus-visible {
         border-bottom: 0;
     }
 
-    .mobile-cell-label {
+    .cheatsheet-table .mobile-cell-label {
         display: block;
         margin-bottom: 4px;
         color: var(--color-text-tertiary);
         font-size: var(--text-xs);
         font-weight: 600;
-    }
-
-    .cheatsheet-table tbody td:nth-child(2) .mobile-cell-label {
-        font-size: 0;
-    }
-
-    .cheatsheet-table tbody td:nth-child(2) .mobile-cell-label::after {
-        content: "Markdown 写法";
-        font-size: var(--text-xs);
     }
 
     .cheatsheet-table tbody td:nth-child(2)::before,

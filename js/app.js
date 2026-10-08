@@ -934,7 +934,7 @@ function createContentItem(id, data) {
                     if (index === 1 || index === 2) {
                         const label = document.createElement('span');
                         label.className = 'mobile-cell-label';
-                        label.textContent = columnLabels[index];
+                        label.textContent = index === 1 ? '写法' : '效果';
                         cell.prepend(label);
                     }
                 });
