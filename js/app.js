@@ -198,14 +198,14 @@ def hello():
         syntax: '![替代文本](图片路径)',
         markdown: `![算法流程拓扑图](./images/aco-flow.png)
 
-![收敛曲线对比](https://example.com/result.png)`,
+![收敛曲线对比](./images/result.png)`,
         tips: `<strong>💡 推荐知识库目录组织：</strong>
 <pre style="background: #F1F5F9; color: #0F172A; padding: 8px 12px; border-radius: 6px;"><code>notes/
 ├── ACO_Algorithm.md
 └── images/
     ├── aco-flow.png
     └── result.png</code></pre>
-<p>在笔记中一律推荐使用相对路径引入图片：<code>![描述](./images/xxx.png)</code></p>`
+<p>在笔记中一律推荐使用相对路径引入图片：<code>![描述](./images/xxx.png)</code>，同时也支持在线图源网络链接：<code>![描述](https://...)</code>。</p>`
     },
     'table': {
         title: '表格',
@@ -661,6 +661,7 @@ Thread 4 "main" received signal SIGSEGV, Segmentation fault.
 // ==================== 初始化 ====================
 document.addEventListener('DOMContentLoaded', () => {
     initMermaid();
+    initImageErrorHandler();
     initNavigation();
     initModal();
     initEditor();
@@ -672,6 +673,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // 默认展示第一个语法卡片
     showContent('heading');
 });
+
+// 初始化全局图片加载错误防御 (捕获阶段监听非冒泡 error 事件)
+function initImageErrorHandler() {
+    window.addEventListener('error', (e) => {
+        if (e.target && e.target.tagName === 'IMG' && (e.target.closest('.preview-content') || e.target.closest('#editorPreview'))) {
+            window.handleImageError(e.target);
+        }
+    }, true);
+}
 
 // 初始化 Mermaid 图表引擎
 function initMermaid() {
@@ -825,17 +835,6 @@ function createContentItem(id, data) {
         Prism.highlightElement(block);
     });
     
-    // 执行 KaTeX 数学公式渲染
-    if (typeof renderMathInElement !== 'undefined') {
-        renderMathInElement(div, {
-            delimiters: [
-                {left: '$$', right: '$$', display: true},
-                {left: '$', right: '$', display: false}
-            ],
-            throwOnError: false
-        });
-    }
-    
     // 绑定一键复制功能
     div.querySelector('.copy-btn').addEventListener('click', (e) => {
         const btn = e.currentTarget;
@@ -850,19 +849,121 @@ function createContentItem(id, data) {
     return div;
 }
 
-// 解析 Markdown 并转译 Mermaid 图表代码块
+// 全局图片加载失败防御性优雅降级
+window.handleImageError = function(img) {
+    if (!img || img.dataset.failed) return;
+    img.dataset.failed = 'true';
+    
+    const alt = img.getAttribute('alt') || '图片资源未就绪';
+    const src = img.getAttribute('src') || '';
+    
+    const placeholder = document.createElement('div');
+    placeholder.className = 'image-fallback-placeholder';
+    placeholder.setAttribute('role', 'img');
+    placeholder.setAttribute('aria-label', alt);
+    
+    placeholder.innerHTML = `
+        <div class="fallback-icon-wrap">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="2" y1="2" x2="22" y2="22"></line>
+                <path d="M10.41 10.41a2 2 0 1 1-2.83-2.83"></path>
+                <line x1="13.5" y1="13.5" x2="6" y2="21"></line>
+                <line x1="18" y1="12" x2="21" y2="15"></line>
+                <path d="M3.59 3.59A1.99 1.99 0 0 0 3 5v14a2 2 0 0 0 2 2h14c.55 0 1.05-.22 1.41-.59"></path>
+                <path d="M21 15V5a2 2 0 0 0-2-2H9"></path>
+            </svg>
+        </div>
+        <div class="fallback-info">
+            <span class="fallback-alt">${escapeHtml(alt)}</span>
+            <span class="fallback-src">无法加载资源：<code>${escapeHtml(src)}</code></span>
+        </div>
+    `;
+    
+    img.replaceWith(placeholder);
+};
+
+// 解析 Markdown 并转译 Mermaid 图表、KaTeX 数学公式与防破损图片
 function parseMarkdown(mdText) {
     if (typeof marked === 'undefined') return mdText;
-    
-    // 临时替换 mermaid 代码块为带标记的 HTML，让 mermaid.run 接管
-    let html = marked.parse(mdText);
-    
-    // 处理 Mermaid 图表
+    if (!mdText) return '';
+
+    const codeTokens = [];
+    // 1. 保护代码块与行内代码，防止其中的 $ 符号或反斜杠被误提取为公式
+    let preprocessed = mdText.replace(/(```[\s\S]*?```|`[^`\n]+`)/g, (match) => {
+        const id = `%%CODEHOLDER${codeTokens.length}%%`;
+        codeTokens.push({ id, code: match });
+        return id;
+    });
+
+    const mathTokens = [];
+
+    // 2. 提取独立块级公式 $$ ... $$ (支持跨行和单行，使用非 Markdown 标记 %%)
+    preprocessed = preprocessed.replace(/\$\$([\s\S]+?)\$\$/g, (match, math) => {
+        const id = `%%KATEXBLOCK${mathTokens.length}%%`;
+        mathTokens.push({ id, math: math.trim(), display: true });
+        return `\n\n${id}\n\n`;
+    });
+
+    // 3. 提取行内公式 $ ... $ (两端非空白，排除转义 \$，不跨行)
+    preprocessed = preprocessed.replace(/(?<!\\)\$([^\$\n\r]+?)(?<!\\)\$/g, (match, math) => {
+        if (!math || /^\s|\s$/.test(math)) return match;
+        const id = `%%KATEXINLINE${mathTokens.length}%%`;
+        mathTokens.push({ id, math: math.trim(), display: false });
+        return id;
+    });
+
+    // 4. 还原代码块（使用 split/join 彻底避免 $ 在 replace 中的参数误替换）
+    codeTokens.forEach(t => {
+        preprocessed = preprocessed.split(t.id).join(t.code);
+    });
+
+    // 5. 调用 marked 转译核心 Markdown 结构
+    let html = marked.parse(preprocessed);
+
+    // 6. 回填并原生渲染 KaTeX 数学公式
+    mathTokens.forEach(t => {
+        let mathHtml = '';
+        if (typeof katex !== 'undefined') {
+            try {
+                mathHtml = katex.renderToString(t.math, {
+                    displayMode: t.display,
+                    throwOnError: false
+                });
+            } catch (err) {
+                console.warn('KaTeX render error:', err);
+                mathHtml = `<span class="katex-error">${escapeHtml(t.math)}</span>`;
+            }
+        } else {
+            mathHtml = t.display 
+                ? `<div class="katex-fallback">$$${escapeHtml(t.math)}$$</div>`
+                : `<span class="katex-fallback">$${escapeHtml(t.math)}$</span>`;
+        }
+
+        if (t.display) {
+            // 如果 marked 将占位符包裹在 <p> 标签中，将其平滑替换为块级容器
+            const pWrappedRegex = new RegExp('<p>\\s*' + t.id + '\\s*<\\/p>', 'g');
+            const blockContainer = `<div class="katex-display-container">${mathHtml}</div>`;
+            if (pWrappedRegex.test(html)) {
+                html = html.replace(pWrappedRegex, blockContainer);
+            } else {
+                html = html.split(t.id).join(blockContainer);
+            }
+        } else {
+            html = html.split(t.id).join(`<span class="katex-inline-container">${mathHtml}</span>`);
+        }
+    });
+
+    // 7. 处理 Mermaid 图表代码块
     html = html.replace(/<pre><code class="language-mermaid">([\s\S]*?)<\/code><\/pre>/g, (match, code) => {
         const decodedCode = code.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
         return `<div class="mermaid">${decodedCode}</div>`;
     });
-    
+
+    // 8. 增强图片标签，注入防图裂错误监听
+    html = html.replace(/<img\s+([^>]*?)src=["']([^"']*)["']([^>]*?)>/gi, (match, before, src, after) => {
+        return `<img ${before}src="${src}" onerror="window.handleImageError(this)"${after}>`;
+    });
+
     return html;
 }
 
@@ -905,21 +1006,18 @@ function initEditor() {
             Prism.highlightElement(block);
         });
         
-        if (typeof renderMathInElement !== 'undefined') {
-            renderMathInElement(editorPreview, {
-                delimiters: [
-                    {left: '$$', right: '$$', display: true},
-                    {left: '$', right: '$', display: false}
-                ],
-                throwOnError: false
-            });
-        }
-        
         if (typeof mermaid !== 'undefined' && editorPreview.querySelector('.mermaid')) {
             try {
                 mermaid.run({ nodes: editorPreview.querySelectorAll('.mermaid') });
             } catch (e) {}
         }
+
+        // 检查已加载完成但资源无效的图片
+        editorPreview.querySelectorAll('img').forEach(img => {
+            if (img.complete && img.naturalWidth === 0) {
+                window.handleImageError(img);
+            }
+        });
     });
     
     document.getElementById('clearBtn')?.addEventListener('click', () => {
@@ -940,21 +1038,17 @@ function openEditor(initialText = '') {
         Prism.highlightElement(block);
     });
     
-    if (typeof renderMathInElement !== 'undefined') {
-        renderMathInElement(editorPreview, {
-            delimiters: [
-                {left: '$$', right: '$$', display: true},
-                {left: '$', right: '$', display: false}
-            ],
-            throwOnError: false
-        });
-    }
-    
     if (typeof mermaid !== 'undefined' && editorPreview.querySelector('.mermaid')) {
         try {
             mermaid.run({ nodes: editorPreview.querySelectorAll('.mermaid') });
         } catch (e) {}
     }
+
+    editorPreview.querySelectorAll('img').forEach(img => {
+        if (img.complete && img.naturalWidth === 0) {
+            window.handleImageError(img);
+        }
+    });
     
     modal.classList.add('active');
 }
