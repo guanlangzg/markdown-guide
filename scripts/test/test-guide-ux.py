@@ -41,7 +41,9 @@ class GuideExperienceTests(unittest.TestCase):
         )
         self.addCleanup(context.close)
         page = context.new_page()
-        page.goto(self.base_url + path, wait_until='domcontentloaded')
+        # 页面带有多个 CDN 外链脚本，机器负载高时 domcontentloaded 也可能被拖到
+        # 默认 30s 之外，这里放宽导航超时，把偶发失败留给真正的断言去暴露。
+        page.goto(self.base_url + path, wait_until='domcontentloaded', timeout=90000)
         page.locator('.content-item.active').wait_for()
         return page
 
@@ -91,22 +93,31 @@ class GuideExperienceTests(unittest.TestCase):
         self.assertEqual(labels.nth(0).inner_text(), '写法')
         self.assertEqual(labels.nth(1).inner_text(), '效果')
 
+    def assert_visible_item(self, page, expected_id, action_label):
+        # hashchange 是异步派发的：click 与断言之间可能只看到 hash 已变、
+        # 卡片尚未切换的中间态，所以等 DOM 自己到位再断言。
+        expect(page.locator('.content-item.active')).to_have_id(expected_id, timeout=5000)
+        self.assertEqual(
+            page.locator('.content-item.active').get_attribute('id'),
+            expected_id,
+            action_label,
+        )
+
     def test_deep_link_and_browser_history_restore_selection(self):
         page = self.open_page('#math')
         self.assertEqual(page.locator('.content-item.active').get_attribute('id'), 'math')
         self.assertEqual(page.locator('.nav-list li.active').get_attribute('data-id'), 'math')
         page.get_by_role('link', name='标题', exact=True).click()
-        self.assertEqual(page.url.split('#')[-1], 'heading')
-        self.assertEqual(page.locator('.content-item.active').get_attribute('id'), 'heading')
+        self.assert_visible_item(page, 'heading', 'click link should switch card')
         page.go_back()
-        self.assertEqual(page.locator('.content-item.active').get_attribute('id'), 'math')
+        self.assert_visible_item(page, 'math', 'go_back should restore card')
 
     def test_keyboard_navigation_and_copyable_badges(self):
         page = self.open_page()
         page.get_by_role('link', name='标题', exact=True).focus()
         page.keyboard.press('Enter')
-        self.assertEqual(
-            page.locator('.content-item.active').get_attribute('id'),
+        self.assert_visible_item(
+            page,
             'heading',
             f"url={page.url}, focused={page.evaluate('document.activeElement.outerHTML')}",
         )
@@ -145,6 +156,41 @@ class GuideExperienceTests(unittest.TestCase):
         source = page.locator('#heading .demo-source').bounding_box()
         preview = page.locator('#heading .demo-preview').bounding_box()
         self.assertLess(source['height'] + 70, preview['height'])
+
+    def test_editor_escapes_injected_html_but_keeps_markdown(self):
+        page = self.open_page('#html-mix')
+        card = page.locator('#html-mix .preview-content')
+        self.assertEqual(card.locator('kbd').count(), 2)
+        self.assertEqual(card.locator('div[align="center"]').count(), 1)
+        self.assertEqual(card.locator('span[style]').count(), 1)
+
+        page.locator('#html-mix .edit-btn').click()
+        page.locator('#editorInput').fill(
+            '段落 <b>粗</b> 与 <script>alert(1)</script>\n\n'
+            '<img src=x onerror="alert(1)">\n\n'
+            '<details><summary>折叠</summary>内容</details>\n\n'
+            '| a | b |\n| - | - |\n| 1 | 2 |\n\n'
+            '普通 **粗体** 与 `代码`。\n'
+        )
+        preview = page.locator('#editorPreview')
+        state = preview.evaluate('() => ({'
+                                 'script: !!document.querySelector("#editorPreview script"),'
+                                 'img: !!document.querySelector("#editorPreview img"),'
+                                 'b: !!document.querySelector("#editorPreview b"),'
+                                 'details: !!document.querySelector("#editorPreview details"),'
+                                 'div: !!document.querySelector("#editorPreview div[align]"),'
+                                 'table: !!document.querySelector("#editorPreview table"),'
+                                 'bold: !!document.querySelector("#editorPreview strong"),'
+                                 'code: !!document.querySelector("#editorPreview code")'
+                                 '})')
+        # 注入的标签只能作为文本存在，不能成为真实节点
+        for tag in ('script', 'img', 'b', 'details', 'div'):
+            self.assertFalse(state[tag], f'注入的 <{tag}> 被真实渲染，XSS 面未闭合')
+        # 普通 Markdown 语法必须不受影响
+        self.assertTrue(state['table'])
+        self.assertTrue(state['bold'])
+        self.assertTrue(state['code'])
+        self.assertIn('script', preview.inner_text())
 
 
 if __name__ == '__main__':

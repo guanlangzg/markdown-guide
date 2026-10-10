@@ -4,14 +4,12 @@
     --color-bg-base: #F8FAFC;          /* Slate 50 页面底色 */
     --color-bg-elevated: #FFFFFF;      /* 纯白卡片 */
     --color-bg-subtle: #F1F5F9;        /* Slate 100 浅灰底 */
-    --color-bg-muted: #E2E8F0;         /* Slate 200 禁用或极弱背景 */
-    
+
     /* 源码展示区：深板岩暗夜黑 (Dark Slate #0F172A) */
     --color-code-bg: #0F172A;          /* Slate 900 代码区主底色 */
     --color-code-header: #1E293B;      /* Slate 800 代码区顶部操作栏 */
     --color-code-border: #334155;      /* Slate 700 代码区细边框 */
     --color-code-text: #F8FAFC;        /* 代码区默认高亮文字 */
-    --color-code-muted: #64748B;       /* 代码区注释与次级文字 */
     
     /* 细线系统：全部采用 1px 精细线条 */
     --color-border: #E2E8F0;           /* 主边框 Slate 200 */
@@ -32,11 +30,8 @@
     
     /* 语义辅助色 */
     --color-success: #10B981;          /* 翡翠绿 (复制成功等) */
-    --color-warning: #F59E0B;          /* 琥珀黄 (避坑提示、搜索高亮) */
-    --color-info: #6366F1;             /* 靛蓝 (演练编辑按钮) */
-    
+
     /* 间距节奏 (基于 4px / 8px 律动) */
-    --rhythm-1: 0.25rem;    /* 4px */
     --rhythm-2: 0.5rem;     /* 8px */
     --rhythm-3: 0.75rem;    /* 12px */
     --rhythm-4: 1rem;       /* 16px */
@@ -44,10 +39,8 @@
     --rhythm-6: 1.5rem;     /* 24px */
     --rhythm-8: 2rem;       /* 32px */
     --rhythm-10: 2.5rem;    /* 40px */
-    --rhythm-12: 3rem;      /* 48px */
-    
+
     /* 圆角 */
-    --radius-xs: 4px;
     --radius-sm: 6px;
     --radius-md: 10px;
     --radius-lg: 14px;
@@ -71,10 +64,7 @@
     --text-sm: 0.875rem;    /* 14px */
     --text-base: 0.9375rem; /* 15px */
     --text-md: 1rem;        /* 16px */
-    --text-lg: 1.125rem;    /* 18px */
-    --text-xl: 1.25rem;     /* 20px */
     --text-2xl: 1.5rem;     /* 24px */
-    --text-3xl: 1.875rem;   /* 30px */
 }
 
 /* ==================== 基础样式与重置 ==================== */

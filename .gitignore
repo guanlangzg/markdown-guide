@@ -8,13 +8,16 @@ Thumbs.db
 *.swp
 *.swo
 
-# Internal Agent & Test files
+# Internal Agent files
 AGENTS.md
 memory.md
-scripts/*
-!scripts/test/
-scripts/test/*
-!scripts/test/test-guide-ux.py
+
+# 测试资产需入库，保证 clone 后可复现全部回归命令；
+# 仅忽略运行期产物（截图、临时脚本）
+scripts/test/screenshots/
+scripts/test/tmp-*
+*.pyc
+__pycache__/
 
 # Temporary files
 *.tmp

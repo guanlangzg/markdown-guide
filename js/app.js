@@ -679,6 +679,64 @@ Thread 4 "main" received signal SIGSEGV, Segmentation fault.
     }
 };
 
+// ==================== 速查表权威源码解析 ====================
+// 速查表第二列给出的必须是可以直接粘贴回编辑器的原始 Markdown 源码。
+// marked 渲染再把 DOM textContent 取出来时，浏览器已把 `\|` 反转义成 `|`、
+// 嵌套反引号也被吃掉，粘贴后表格立即错列。因此一律回到 data.markdown 原文解析。
+function splitMarkdownTableRow(rowLine) {
+    const line = rowLine.trim().replace(/^\|/, '').replace(/\|$/, '');
+    return line.split(/(?<!\\)\|/).map(cell => cell.trim());
+}
+
+function extractInlineCodes(sourceCell) {
+    const codes = [];
+    // CommonMark 的 code span 由等长反引号串定界，故按相同长度的成对反引号匹配，
+    // 从最长开始尝试以正确处理 `` `code` `` 这类内部含单反引号的写法。
+    const regex = /(`+)([^`]|[^`][\s\S]*?[^`])\1(?!`)/g;
+    let match;
+    while ((match = regex.exec(sourceCell)) !== null) {
+        const content = match[0].slice(match[1].length, -match[1].length);
+        // 反引号包裹内容按原样保留：这里尚未经过 marked 渲染，转义符仍在
+        codes.push(content.trim());
+    }
+    return codes;
+}
+
+function stripMarkdownEmphasis(text) {
+    return text.replace(/\*\*/g, '').trim();
+}
+
+// 解析速查表原始表格：跳过分隔行，按语法名索引每一行的第二列原文与行内代码片段。
+// 表头行也会被收进来，但调用方按语法名精确匹配取值，因此不受行号偏移影响。
+function parseCheatsheetTableRows(markdown) {
+    const rows = new Map();
+    markdown.split('\n').forEach(line => {
+        const trimmed = line.trim();
+        if (!trimmed.startsWith('|')) return;
+        if (/^\|[\s:-]+\|/.test(trimmed)) return;
+        const cells = splitMarkdownTableRow(trimmed);
+        if (cells.length < 2) return;
+        const name = stripMarkdownEmphasis(cells[0]);
+        if (!name || rows.has(name)) return;
+        rows.set(name, {
+            name,
+            source: cells[1],
+            inlineCodes: extractInlineCodes(cells[1])
+        });
+    });
+    return rows;
+}
+
+// 取某一行的权威复制内容：优先内置标准化模板，其次原文第二列，最后退回预设备用
+function resolveCheatsheetSnippet(rawName, sourceRow) {
+    const matchedKey = Object.keys(CHEATSHEET_SNIPPETS).find(k => rawName.includes(k));
+    const authoritative = sourceRow ? sourceRow.source : '';
+    return {
+        key: matchedKey || rawName,
+        value: CHEATSHEET_SNIPPETS[matchedKey] || authoritative
+    };
+}
+
 // ==================== 初始化 ====================
 document.addEventListener('DOMContentLoaded', () => {
     initMermaid();
@@ -738,7 +796,8 @@ function initMermaid() {
                 rankSpacing: 28,
                 padding: 10
             },
-            securityLevel: 'loose'
+            // 站点内容全部来自本地固定数据，无需 loose 放宽的 HTML 注入能力
+            securityLevel: 'strict'
         });
     }
 }
@@ -773,6 +832,8 @@ function initNavigation() {
         link.addEventListener('click', (event) => {
             event.preventDefault();
             const id = link.closest('li').dataset.id;
+            // hash 是唯一状态源：相同 hash 时浏览器不会触发 hashchange，
+            // 这里补一次渲染，保证重复点击仍能回顶并刷新选中态。
             if (window.location.hash === `#${id}`) {
                 showContent(id);
             } else {
@@ -816,7 +877,8 @@ function createContentItem(id, data) {
     if (id === 'cheatsheet') div.classList.add('cheatsheet-item');
     
     // 自定义 marked 渲染器，对 mermaid 代码块进行特别包装
-    const rawHtml = parseMarkdown(data.markdown);
+    // 卡片数据来自仓库内固定内容，其中「HTML 混用」等条目需要真实渲染标签
+    const rawHtml = parseMarkdown(data.markdown, true);
     
     div.innerHTML = `
         <div class="content-header">
@@ -928,7 +990,10 @@ function createContentItem(id, data) {
             table.parentNode.insertBefore(banner, table);
             
             const columnLabels = [...table.querySelectorAll('thead th')].map(th => th.textContent.trim());
-            table.querySelectorAll('tbody tr').forEach(row => {
+            const rows = [...table.querySelectorAll('tbody tr')];
+            // 权威源码按语法名索引，复制内容只从原文解析结果取，不取 DOM textContent
+            const sourceRows = parseCheatsheetTableRows(data.markdown);
+            rows.forEach((row, rowIndex) => {
                 row.querySelectorAll('td').forEach((cell, index) => {
                     cell.dataset.label = columnLabels[index];
                     if (index === 1 || index === 2) {
@@ -948,27 +1013,33 @@ function createContentItem(id, data) {
                 th.textContent = '快捷操作';
                 theadTr.appendChild(th);
             }
-            
+
             // 增强每一行
-            table.querySelectorAll('tbody tr').forEach(tr => {
+            rows.forEach(tr => {
                 const cells = tr.querySelectorAll('td');
                 if (cells.length >= 2) {
                     const rawName = cells[0].textContent.trim();
-                    const snippetKey = Object.keys(CHEATSHEET_SNIPPETS).find(k => rawName.includes(k)) || rawName;
-                    const snippet = CHEATSHEET_SNIPPETS[snippetKey] || cells[1].textContent.trim();
-                    
-                    // 使第二列中的代码可点击复制
-                    cells[1].querySelectorAll('code').forEach(codeEl => {
+                    const sourceRow = sourceRows.get(stripMarkdownEmphasis(rawName));
+                    const snippet = resolveCheatsheetSnippet(rawName, sourceRow);
+                    const snippetKey = snippet.key;
+
+                    // 行内代码徽章同样只从权威源码取值：DOM textContent 已被浏览器反转义，
+                    // 表格管道符或嵌套反引号会丢失转义，粘回编辑器即错位。
+                    const badges = cells[1].querySelectorAll('code');
+                    badges.forEach((codeEl, codeIndex) => {
+                        const displayText = codeEl.textContent.trim();
                         const copyBadge = document.createElement('button');
                         copyBadge.type = 'button';
                         copyBadge.className = 'copyable-code-badge';
-                        copyBadge.title = `点击复制: ${codeEl.textContent.trim()}`;
-                        copyBadge.setAttribute('aria-label', `复制 ${codeEl.textContent.trim()}`);
+                        copyBadge.title = `点击复制: ${displayText}`;
+                        copyBadge.setAttribute('aria-label', `复制 ${displayText}`);
                         copyBadge.innerHTML = codeEl.outerHTML;
-                        codeEl.replaceWith(copyBadge);
                         copyBadge.addEventListener('click', () => {
-                            copyToClipboard(copyBadge.querySelector('code').textContent.trim(), copyBadge);
+                            // 按标签序取原文对应反引号片段，取不到时退回整行模板
+                            const codes = sourceRow ? sourceRow.inlineCodes : [];
+                            copyToClipboard(codes[codeIndex] || snippet.value, copyBadge);
                         });
+                        codeEl.replaceWith(copyBadge);
                     });
                     
                     const td = document.createElement('td');
@@ -985,10 +1056,10 @@ function createContentItem(id, data) {
                         </svg>
                         <span class="btn-text">复制</span>
                     `;
-                    
+
                     copyBtn.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        copyToClipboard(snippet, copyBtn);
+                        copyToClipboard(snippet.value, copyBtn);
                     });
                     
                     td.appendChild(copyBtn);
@@ -1045,8 +1116,26 @@ window.handleImageError = function(img) {
     img.replaceWith(placeholder);
 };
 
-// 解析 Markdown 并转译 Mermaid 图表、KaTeX 数学公式与防破损图片
-function parseMarkdown(mdText) {
+// marked 4.x 起移除了 sanitize 选项，而 marked 11 的 parse(src, { renderer })
+// 不接受 partial renderer 对象（内部直接调用缺失方法会抛错），必须新建一个
+// Marked 实例并把 renderer 交给它合并。这里只覆写 html 一项：
+// 远程内容（实时演练编辑器）走该实例，把原始 HTML 降级为转义纯文本，
+// 同时这也是下方「解码后回填」步骤的安全前提——marked 输出中不会存在
+// 调用方可控的标签结构。
+function createEscapingMarked() {
+    return new marked.Marked({
+        renderer: {
+            html(text) {
+                return escapeHtml(text);
+            }
+        }
+    });
+}
+
+// 解析 Markdown 并转译 Mermaid 图表、KaTeX 数学公式与防破损图片。
+// allowRawHtml 仅用于仓库内固定的展示数据（如「HTML 混用」卡片需要真实渲染标签），
+// 任何用户输入一律传 false。
+function parseMarkdown(mdText, allowRawHtml = false) {
     if (typeof marked === 'undefined') return mdText;
     if (!mdText) return '';
 
@@ -1081,7 +1170,11 @@ function parseMarkdown(mdText) {
     });
 
     // 5. 调用 marked 转译核心 Markdown 结构
-    let html = marked.parse(preprocessed);
+    // 不可信输入走一次性 Marked 实例（只覆写 html），
+    // 因 marked.use() 是全局生效的，会连带影响卡片数据路径。
+    let html = allowRawHtml
+        ? marked.parse(preprocessed)
+        : createEscapingMarked().parse(preprocessed);
 
     // 6. 回填并原生渲染 KaTeX 数学公式
     mathTokens.forEach(t => {
@@ -1117,8 +1210,10 @@ function parseMarkdown(mdText) {
     });
 
     // 7. 处理 Mermaid 图表代码块
+    // 只解码本步自己生成的 language-mermaid 代码块，且解码结果仅作为 Mermaid 源码，
+    // 经 mermaid.run 由 Mermaid 自身转成 SVG。绝不把 HTML 片段拼回 outerHTML。
     html = html.replace(/<pre><code class="language-mermaid">([\s\S]*?)<\/code><\/pre>/g, (match, code) => {
-        const decodedCode = code.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+        const decodedCode = decodeHtmlEntities(code);
         return `<div class="mermaid">${decodedCode}</div>`;
     });
 
@@ -1128,6 +1223,12 @@ function parseMarkdown(mdText) {
     });
 
     return html;
+}
+
+// 仅反转义 HTML 实体，供 Mermaid 源码还原使用；不解释任何标签结构
+function decodeHtmlEntities(text) {
+    const entities = { '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'", '&amp;': '&' };
+    return text.replace(/&(?:lt|gt|quot|#39|amp);/g, m => entities[m]);
 }
 
 // 展示指定的语法卡片
@@ -1174,7 +1275,8 @@ function initEditor() {
     
     editorInput.addEventListener('input', () => {
         const markdown = editorInput.value;
-        const html = parseMarkdown(markdown);
+        // 用户输入一律禁用原始 HTML 透传
+        const html = parseMarkdown(markdown, false);
         editorPreview.innerHTML = html;
         
         editorPreview.querySelectorAll('pre code').forEach(block => {
@@ -1208,7 +1310,8 @@ function openEditor(initialText = '') {
     const editorPreview = document.getElementById('editorPreview');
     
     editorInput.value = initialText;
-    editorPreview.innerHTML = parseMarkdown(initialText);
+    // 草稿内容同样按不可信输入处理
+    editorPreview.innerHTML = parseMarkdown(initialText, false);
     
     editorPreview.querySelectorAll('pre code').forEach(block => {
         Prism.highlightElement(block);
@@ -1390,6 +1493,7 @@ function displaySearchResults(results, query) {
         item.addEventListener('click', () => {
             const id = item.dataset.id;
             closeSearchModal();
+            // 与导航一致：hash 变化交给 hashchange 处理，相同 hash 时手动触发
             if (window.location.hash === `#${id}`) {
                 showContent(id);
             } else {
