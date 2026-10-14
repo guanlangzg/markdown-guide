@@ -519,6 +519,150 @@ int main() {
     },
 
     // 🔧 实用指南 (6项)
+    'template-leetcode': {
+        title: 'LeetCode 算法复盘模板',
+        category: '🔧 实用指南',
+        scenario: '刷题备忘 · 路径规划',
+        syntax: 'A+B融合全能版 · 7大核心模块',
+        markdown: `# [算法题解 & 学习备忘] LeetCode 3. 无重复字符的最长子串 (滑动窗口经典)
+
+## 1. 题目档案与学习路径规划 (Profile & Learning Roadmap)
+
+| 规划维度 | 详细内容 / 目标指标 |
+| :--- | :--- |
+| **题目编号 & 难度** | LeetCode 003 / 剑指 Offer 48 · **🟡 Medium (力扣必刷 Top 100)** |
+| **知识树专题路径** | 数组与字符串 ➔ 双指针法 ➔ **定长/不定长滑动窗口** |
+| **前置掌握知识点** | 哈希表原理 (\`std::unordered_map\`)、左右双指针滑动单调收敛性 |
+| **推荐 STL 选型** | 现代 C++ \`std::array<int, 128>\` (ASCII 极致查表优化，零堆分配) |
+| **进阶进阶题单** | [LC 76 最小覆盖子串] ➔ [LC 438 找到所有字母异位词] ➔ [LC 209 长度最小的子数组] |
+
+### 📅 艾宾浩斯记忆与刷题复习打卡 (Spaced Repetition Tracker)
+- [x] **Day 1 初刷复盘** (2026-10-14)：独立推导出滑动窗口收缩条件，耗时 18 分钟；
+- [ ] **Day 3 二刷默写** (待复习)：不看题解白板手撕，注意空串与全同字符边界；
+- [ ] **Day 7 变式巩固** (待复习)：完成进阶题 LC 76 最小覆盖子串；
+- [ ] **Day 30 面试突击** (待复习)：达到 5 分钟内 Bug-Free 完成，并讲清时间复杂度 $O(N)$。
+
+---
+
+## 2. 破局思维备忘与备忘闪念卡 (Heuristics Flashcard)
+
+> 💡 **破局信号词**：
+> 题目出现 **“连续子串 / 连续子数组”**，且要求 **“最长 / 最短 / 最大和”** 时，95% 优先联想 **滑动窗口 (Sliding Window)** 思想！
+
+### 核心三步口诀
+1. **右指针主动扩张**：不断右移扩大窗口，加入新字符并更新当前窗口内的状态；
+2. **左指针被动收缩**：当窗口触发“不合法条件”（出现重复字符）时，循环收缩左边界直到重新合法；
+3. **全局最优解更新**：每次窗口合法时，即时以 \`std::max\` 更新最大长度窗口。
+
+---
+
+## 3. 算法推演与指针滑动图解 (Visual Sliding Window)
+
+以字符串 \`s = "pwwkew"\` 为例，双指针滑动与哈希映射演进过程：
+
+\`\`\`
+步骤 1:  [p] w w k e w          win: {p:1}              len = 1
+         L,R
+步骤 2:  [p  w] w k e w         win: {p:1, w:1}         len = 2
+         L   R
+步骤 3:   p [w  w] k e w  ──►   发现 'w' 重复！收缩左指针 L 越过前一个 'w'：
+             L  R
+          p  w [w] k e w        win: {w:1}              len = 1
+                L,R
+步骤 4:   p  w [w  k] e w       win: {w:1, k:1}         len = 2
+                L  R
+步骤 5:   p  w [w  k  e] w      win: {w:1, k:1, e:1}    len = 3  (★ 最优解: "wke")
+                L     R
+\`\`\`
+
+---
+
+## 4. 现代 C++ 工业级最优解 (Optimal Modern C++ Solution)
+
+结合 **现代 C++ 规范 (C++20)**：使用 \`std::string_view\` 零拷贝视图、\`std::array\` 极致内存局部性、防御性断言与 \`[[nodiscard]]\`：
+
+\`\`\`cpp
+#include <string_view>
+#include <array>
+#include <algorithm>
+#include <cstdint>
+#include <iostream>
+
+class Solution {
+public:
+    // 现代规范：传入 string_view 避免隐式分配内存，[[nodiscard]] 强制调用方使用返回值
+    [[nodiscard]] int lengthOfLongestSubstring(std::string_view s) noexcept {
+        if (s.empty()) return 0;
+
+        // 性能技巧：题目字符为 ASCII 字符，直接用 128 长度定长数组记录「字符最后一次出现的下标」
+        // 相比 std::unordered_map，消除所有动态内存分配与哈希碰撞，Cache 命中率极高
+        std::array<int, 128> last_pos;
+        last_pos.fill(-1); // 初始化为 -1 表示未出现
+
+        int max_len = 0;
+        int left = 0; // 滑动窗口左边界
+
+        for (int right = 0; right < static_cast<int>(s.length()); ++right) {
+            const unsigned char ch = static_cast<unsigned char>(s[right]);
+
+            // 如果字符已出现过，且其上次位置在当前窗口内，则左边界跳跃到其后一位
+            if (last_pos[ch] >= left) {
+                left = last_pos[ch] + 1;
+            }
+
+            last_pos[ch] = right; // 记录最新索引
+            max_len = std::max(max_len, right - left + 1); // 更新最大长度
+        }
+
+        return max_len;
+    }
+};
+\`\`\`
+
+---
+
+## 5. 传统写法 vs 现代写法对照 (Before vs After)
+
+| 比较维度 | 传统 C/C++98 刷题写法 | 现代 C++20 刷题写法 (推荐) |
+| :--- | :--- | :--- |
+| **入参传递** | \`const string& s\` (依赖 string 实例) | \`std::string_view s\` (零拷贝切片，兼容 char* / string) |
+| **映射表开销** | \`std::map<char, int>\` ($O(\\log N)$ 树节点多次 malloc) | \`std::array<int, 128>\` ($O(1)$ 连续栈内存，零堆分配) |
+| **边界保护** | 容易发生 \`s.length() - 1\` 下溢引发死循环 | 显式类型转换 \`static_cast<int>\`，防御无符号数下溢 |
+| **代码可读性** | 大量下标手动增减，循环逻辑臃肿易错 | 语义明确，左右指针职责清晰分离 |
+
+---
+
+## 6. 多解法时空复杂度全景对比 (Solutions Comparison)
+
+| 解法策略 | 时间复杂度 | 空间复杂度 | 优缺点与面试评级 |
+| :--- | :--- | :--- | :--- |
+| **解法一：暴力三重循环** | $O(N^3)$ | $O(\\min(N, \\Sigma))$ | 枚举所有子串再判重，在 $N > 1000$ 时必定超时 (TLE)，仅用于理清暴力思路 |
+| **解法二：HashSet 滑窗逐格移动** | $O(2N) = O(N)$ | $O(\\min(N, \\Sigma))$ | 左指针一步一步向右收缩，最坏情况下每个字符被访问两次，容易超时边缘 |
+| **解法三：下标数组跳跃滑窗 (本解)** | **$O(N)$ (严格单次遍历)** | **$O(1)$ (固定128字节)** | **【最优解 ★★★★★】左指针直接跳跃至冲突位置后一位，速度击败 99.8%** |
+
+---
+
+## 7. 致命 Corner Cases 检查清单与避坑指南 (Do's & Don'ts)
+
+### 7.1 必须验证的 5 个极限边界用例 (Test Cases)
+- [x] **空字符串**：\`s = ""\` ➔ 期望输出 \`0\`（验证防御性前置判断）
+- [x] **全相同字符**：\`s = "bbbbb"\` ➔ 期望输出 \`1\`（验证左指针持续更新）
+- [x] **全部不相同**：\`s = "abcdef"\` ➔ 期望输出 \`6\`（验证窗口持续向右单调扩张）
+- [x] **重复出现在首尾**：\`s = "abba"\` ➔ 期望输出 \`2\`（**高频易错！** 检查左指针不能倒退回退）
+- [x] **包含空格与特殊符号**：\`s = "a b!a c"\` ➔ 期望输出 \`5\`（验证 128 数组越界安全）
+
+### 7.2 Do's & Don'ts 避坑指南
+- [x] **DO**: 左指针更新时必须保证 **单向不倒退**（即 \`left = std::max(left, last_pos[ch] + 1)\`），绝不可写成无条件的 \`left = last_pos[ch] + 1\`；
+- [x] **DO**: 下标转换使用 \`unsigned char\`，防止中文或扩展 ASCII 负数引发数组下溢越界；
+- [ ] **DON'T**: 严禁在 \`s.empty()\` 未判空时直接访问 \`s[0]\`；
+- [ ] **DON'T**: 避免使用 \`std::map\`，刷题中字符映射首选 \`array<int, 128>\` 或 \`unordered_map\`。`,
+        tips: `<strong>💡 模板价值：</strong>
+<ul>
+    <li>有机融合「现代 C++ 规范对比」与「工业级算法题解」，专为力扣刷题与算法备忘打造</li>
+    <li>内置 <strong>艾宾浩斯记忆与复习打卡 (Day 1/3/7/30)</strong> 与 <strong>破局思维闪念卡</strong>，杜绝刷完即忘</li>
+    <li>支持直接点击右上角「实时演练」按钮进行交互式答题练习与代码调试</li>
+</ul>`
+    },
     'template-tech': {
         title: '技术笔记模板',
         category: '🔧 实用指南',

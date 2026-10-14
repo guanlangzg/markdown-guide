@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⭐ 推荐：LeetCode 题解复盘与算法路径全能模板 | C++ 编程学习标准模板</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+
+    <style>
+        :root {
+            --bg-page: #F8FAFC;
+            --color-text: #0F172A;
+            --color-muted: #64748B;
+            --color-border: #E2E8F0;
+            --color-primary: #6366F1;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-page);
+            color: var(--color-text);
+            line-height: 1.75;
+            padding: 30px 20px;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            background: #FFFFFF;
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+        }
+
+        /* 顶部导航控制条 */
+        .page-bar {
+            background: #FFFFFF;
+            border-bottom: 1px solid var(--color-border);
+            padding: 16px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .badge {
+            background: #6366F118;
+            color: #6366F1;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .bar-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.15s ease;
+            border: 1px solid var(--color-border);
+            background: #FFFFFF;
+            color: var(--color-text);
+        }
+
+        .btn:hover { background: #F1F5F9; }
+        .btn-primary { background: #6366F1; color: #FFFFFF; border-color: #6366F1; }
+        .btn-primary:hover { opacity: 0.9; }
+
+        /* 模板信息卡 */
+        .info-card {
+            background: #F8FAFC;
+            border-bottom: 1px solid var(--color-border);
+            padding: 20px 28px;
+        }
+
+        .info-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: #1E293B;
+        }
+
+        .info-list {
+            list-style: none;
+            font-size: 13px;
+            color: var(--color-muted);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        /* 内容正文 */
+        .article-body {
+            padding: 36px 40px;
+        }
+
+        h1 { font-size: 24px; font-weight: 700; border-bottom: 1px solid var(--color-border); padding-bottom: 14px; margin-bottom: 20px; }
+        h2 { font-size: 18px; font-weight: 600; margin-top: 32px; margin-bottom: 14px; color: #1E293B; }
+        h3 { font-size: 15px; font-weight: 600; margin-top: 20px; margin-bottom: 10px; color: #334155; }
+        p { margin-bottom: 14px; }
+        
+        table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 13.5px; }
+        th, td { border: 1px solid var(--color-border); padding: 10px 14px; text-align: left; }
+        th { background: #F8FAFC; font-weight: 600; color: #334155; }
+
+        pre {
+            background: #0F172A !important;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin: 16px 0;
+            overflow-x: auto;
+            border: 1px solid #1E293B;
+        }
+
+        code { font-family: var(--font-mono); font-size: 13px; }
+        p code, li code, td code {
+            background: #F1F5F9;
+            color: #BE185D;
+            padding: 2px 5px;
+            border-radius: 4px;
+            border: 1px solid #E2E8F0;
+        }
+
+        blockquote {
+            border-left: 3px solid #6366F1;
+            background: #6366F110;
+            padding: 12px 18px;
+            border-radius: 0 6px 6px 0;
+            margin: 16px 0;
+            color: #1E293B;
+        }
+
+        ul, ol { padding-left: 22px; margin-bottom: 16px; }
+        li { margin-bottom: 6px; }
+        hr { border: none; border-top: 1px solid var(--color-border); margin: 28px 0; }
+
+        /* 底部导航翻页 */
+        .footer-nav {
+            background: #F8FAFC;
+            border-top: 1px solid var(--color-border);
+            padding: 18px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header class="page-bar">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span class="badge">🔥 A+B 融合全能版 · 刷题与规划备忘</span>
+                <strong style="font-size: 15px;">⭐ 推荐：LeetCode 题解复盘与算法路径全能模板</strong>
+            </div>
+            <div class="bar-actions">
+                <a href="./cpp-templates-showcase.html" class="btn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    <span>对比所有 4 个模板</span>
+                </a>
+                <button class="btn btn-primary" id="copyBtn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    <span>复制该模板 Markdown</span>
+                </button>
+            </div>
+        </header>
+
+        <section class="info-card">
+            <div class="info-title">🎯 模板设计意图与适用场景</div>
+            <ul class="info-list">
+                <li><strong>适用场景：</strong>双指针、滑动窗口、动态规划、单调栈、二分查找、图论最短路等全部 LeetCode/竞赛高频题型</li>
+                <li><strong>目标受众：</strong>力扣刷题冲刺、技术面试备战、算法笔记备忘与长期复习路径规划</li>
+                <li><strong>特色模块：</strong>【融合 A+B】题目档案卡 + 知识树专题路径规划与进阶题单；【融合 A+B】艾宾浩斯复习打卡跟踪器 (Day 1/3/7/30)；【融合 A+B】破局思维闪念卡 + 核心三步口诀（防遗忘备忘）；【融合 A+B】指针/数据流 ASCII 动态演进图解；【融合 A+B】现代 C++20 规范最优解（string_view、定长数组、防御断言）；【融合 A+B】传统 C/C++98 vs 现代 C++20 刷题写法全景对照表；【融合 A+B】多解法时空复杂度对比 + 5 大致命 Corner Cases 检查清单 + Do's & Don'ts</li>
+            </ul>
+        </section>
+
+        <main class="article-body" id="articleBody">
+            <!-- 动态渲染内容 -->
+        </main>
+
+        <footer class="footer-nav">
+            <div>
+                
+            </div>
+            <div>
+                <a href="./template-cpp-feature.html" class="btn">下一个：模板 A →</a>
+            </div>
+        </footer>
+    </div>
+
+    <!-- 依赖脚本 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markdown.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-c.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cmake.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+
+    <script>
+        const rawMarkdown = "# [算法题解 & 学习备忘] LeetCode 3. 无重复字符的最长子串 (滑动窗口经典)\n\n## 1. 题目档案与学习路径规划 (Profile & Learning Roadmap)\n\n| 规划维度 | 详细内容 / 目标指标 |\n| :--- | :--- |\n| **题目编号 & 难度** | LeetCode 003 / 剑指 Offer 48 · **🟡 Medium (力扣必刷 Top 100)** |\n| **知识树专题路径** | 数组与字符串 ➔ 双指针法 ➔ **定长/不定长滑动窗口** |\n| **前置掌握知识点** | 哈希表原理 (`std::unordered_map`)、左右双指针滑动单调收敛性 |\n| **推荐 STL 选型** | 现代 C++ `std::array<int, 128>` (ASCII 极致查表优化，零堆分配) |\n| **进阶进阶题单** | [LC 76 最小覆盖子串] ➔ [LC 438 找到所有字母异位词] ➔ [LC 209 长度最小的子数组] |\n\n### 📅 艾宾浩斯记忆与刷题复习打卡 (Spaced Repetition Tracker)\n- [x] **Day 1 初刷复盘** (2026-10-14)：独立推导出滑动窗口收缩条件，耗时 18 分钟；\n- [ ] **Day 3 二刷默写** (待复习)：不看题解白板手撕，注意空串与全同字符边界；\n- [ ] **Day 7 变式巩固** (待复习)：完成进阶题 LC 76 最小覆盖子串；\n- [ ] **Day 30 面试突击** (待复习)：达到 5 分钟内 Bug-Free 完成，并讲清时间复杂度 $O(N)$。\n\n---\n\n## 2. 破局思维备忘与备忘闪念卡 (Heuristics Flashcard)\n\n> 💡 **破局信号词**：\n> 题目出现 **“连续子串 / 连续子数组”**，且要求 **“最长 / 最短 / 最大和”** 时，95% 优先联想 **滑动窗口 (Sliding Window)** 思想！\n\n### 核心三步口诀\n1. **右指针主动扩张**：不断右移扩大窗口，加入新字符并更新当前窗口内的状态；\n2. **左指针被动收缩**：当窗口触发“不合法条件”（出现重复字符）时，循环收缩左边界直到重新合法；\n3. **全局最优解更新**：每次窗口合法时，即时以 `std::max` 更新最大长度窗口。\n\n---\n\n## 3. 算法推演与指针滑动图解 (Visual Sliding Window)\n\n以字符串 `s = \"pwwkew\"` 为例，双指针滑动与哈希映射演进过程：\n\n```\n步骤 1:  [p] w w k e w          win: {p:1}              len = 1\n         L,R\n步骤 2:  [p  w] w k e w         win: {p:1, w:1}         len = 2\n         L   R\n步骤 3:   p [w  w] k e w  ──►   发现 'w' 重复！收缩左指针 L 越过前一个 'w'：\n             L  R\n          p  w [w] k e w        win: {w:1}              len = 1\n                L,R\n步骤 4:   p  w [w  k] e w       win: {w:1, k:1}         len = 2\n                L  R\n步骤 5:   p  w [w  k  e] w      win: {w:1, k:1, e:1}    len = 3  (★ 最优解: \"wke\")\n                L     R\n```\n\n---\n\n## 4. 现代 C++ 工业级最优解 (Optimal Modern C++ Solution)\n\n结合 **现代 C++ 规范 (C++20)**：使用 `std::string_view` 零拷贝视图、`std::array` 极致内存局部性、防御性断言与 `[[nodiscard]]`：\n\n```cpp\n#include <string_view>\n#include <array>\n#include <algorithm>\n#include <cstdint>\n#include <iostream>\n\nclass Solution {\npublic:\n    // 现代规范：传入 string_view 避免隐式分配内存，[[nodiscard]] 强制调用方使用返回值\n    [[nodiscard]] int lengthOfLongestSubstring(std::string_view s) noexcept {\n        if (s.empty()) return 0;\n\n        // 性能技巧：题目字符为 ASCII 字符，直接用 128 长度定长数组记录「字符最后一次出现的下标」\n        // 相比 std::unordered_map，消除所有动态内存分配与哈希碰撞，Cache 命中率极高\n        std::array<int, 128> last_pos;\n        last_pos.fill(-1); // 初始化为 -1 表示未出现\n\n        int max_len = 0;\n        int left = 0; // 滑动窗口左边界\n\n        for (int right = 0; right < static_cast<int>(s.length()); ++right) {\n            const unsigned char ch = static_cast<unsigned char>(s[right]);\n\n            // 如果字符已出现过，且其上次位置在当前窗口内，则左边界跳跃到其后一位\n            if (last_pos[ch] >= left) {\n                left = last_pos[ch] + 1;\n            }\n\n            last_pos[ch] = right; // 记录最新索引\n            max_len = std::max(max_len, right - left + 1); // 更新最大长度\n        }\n\n        return max_len;\n    }\n};\n```\n\n---\n\n## 5. 传统写法 vs 现代写法对照 (Before vs After)\n\n| 比较维度 | 传统 C/C++98 刷题写法 | 现代 C++20 刷题写法 (推荐) |\n| :--- | :--- | :--- |\n| **入参传递** | `const string& s` (依赖 string 实例) | `std::string_view s` (零拷贝切片，兼容 char* / string) |\n| **映射表开销** | `std::map<char, int>` ($O(\\log N)$ 树节点多次 malloc) | `std::array<int, 128>` ($O(1)$ 连续栈内存，零堆分配) |\n| **边界保护** | 容易发生 `s.length() - 1` 下溢引发死循环 | 显式类型转换 `static_cast<int>`，防御无符号数下溢 |\n| **代码可读性** | 大量下标手动增减，循环逻辑臃肿易错 | 语义明确，左右指针职责清晰分离 |\n\n---\n\n## 6. 多解法时空复杂度全景对比 (Solutions Comparison)\n\n| 解法策略 | 时间复杂度 | 空间复杂度 | 优缺点与面试评级 |\n| :--- | :--- | :--- | :--- |\n| **解法一：暴力三重循环** | $O(N^3)$ | $O(\\min(N, \\Sigma))$ | 枚举所有子串再判重，在 $N > 1000$ 时必定超时 (TLE)，仅用于理清暴力思路 |\n| **解法二：HashSet 滑窗逐格移动** | $O(2N) = O(N)$ | $O(\\min(N, \\Sigma))$ | 左指针一步一步向右收缩，最坏情况下每个字符被访问两次，容易超时边缘 |\n| **解法三：下标数组跳跃滑窗 (本解)** | **$O(N)$ (严格单次遍历)** | **$O(1)$ (固定128字节)** | **【最优解 ★★★★★】左指针直接跳跃至冲突位置后一位，速度击败 99.8%** |\n\n---\n\n## 7. 致命 Corner Cases 检查清单与避坑指南 (Do's & Don'ts)\n\n### 7.1 必须验证的 5 个极限边界用例 (Test Cases)\n- [x] **空字符串**：`s = \"\"` ➔ 期望输出 `0`（验证防御性前置判断）\n- [x] **全相同字符**：`s = \"bbbbb\"` ➔ 期望输出 `1`（验证左指针持续更新）\n- [x] **全部不相同**：`s = \"abcdef\"` ➔ 期望输出 `6`（验证窗口持续向右单调扩张）\n- [x] **重复出现在首尾**：`s = \"abba\"` ➔ 期望输出 `2`（**高频易错！** 检查左指针不能倒退回退）\n- [x] **包含空格与特殊符号**：`s = \"a b!a c\"` ➔ 期望输出 `5`（验证 128 数组越界安全）\n\n### 7.2 Do's & Don'ts 避坑指南\n- [x] **DO**: 左指针更新时必须保证 **单向不倒退**（即 `left = std::max(left, last_pos[ch] + 1)`），绝不可写成无条件的 `left = last_pos[ch] + 1`；\n- [x] **DO**: 下标转换使用 `unsigned char`，防止中文或扩展 ASCII 负数引发数组下溢越界；\n- [ ] **DON'T**: 严禁在 `s.empty()` 未判空时直接访问 `s[0]`；\n- [ ] **DON'T**: 避免使用 `std::map`，刷题中字符映射首选 `array<int, 128>` 或 `unordered_map`。\n";
+
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: 'base',
+            themeVariables: {
+                primaryColor: '#F1F5F9',
+                primaryTextColor: '#0F172A',
+                primaryBorderColor: '#64748B',
+                lineColor: '#64748B',
+                fontFamily: 'Inter, JetBrains Mono, sans-serif'
+            }
+        });
+
+        function renderContent() {
+            // 公式保护
+            const mathBlocks = [];
+            let safeMd = rawMarkdown.replace(/\$\$([\s\S]+?)\$\$/g, (m, formula) => {
+                const idx = mathBlocks.length;
+                mathBlocks.push({ type: 'block', formula });
+                return '%%KATEXBLOCK' + idx + '%%';
+            });
+            safeMd = safeMd.replace(/\$([^\$\n]+?)\$/g, (m, formula) => {
+                const idx = mathBlocks.length;
+                mathBlocks.push({ type: 'inline', formula });
+                return '%%KATEXINLINE' + idx + '%%';
+            });
+
+            let html = marked.parse(safeMd);
+
+            mathBlocks.forEach((item, idx) => {
+                const rendered = katex.renderToString(item.formula, {
+                    displayMode: item.type === 'block',
+                    throwOnError: false
+                });
+                const placeholder = item.type === 'block' ? '%%KATEXBLOCK' + idx + '%%' : '%%KATEXINLINE' + idx + '%%';
+                html = html.split(placeholder).join(rendered);
+            });
+
+            const bodyEl = document.getElementById('articleBody');
+            bodyEl.innerHTML = html;
+
+            // Prism 代码高亮
+            bodyEl.querySelectorAll('pre code').forEach(block => {
+                const lang = block.className.replace('language-', '') || 'cpp';
+                if (Prism.languages[lang]) {
+                    block.innerHTML = Prism.highlight(block.textContent, Prism.languages[lang], lang);
+                }
+            });
+
+            // Mermaid 流程图
+            const mermaidBlocks = bodyEl.querySelectorAll('pre code.language-mermaid');
+            mermaidBlocks.forEach(codeEl => {
+                const pre = codeEl.parentElement;
+                const container = document.createElement('div');
+                container.className = 'mermaid';
+                container.textContent = codeEl.textContent;
+                pre.parentNode.replaceChild(container, pre);
+            });
+            mermaid.run({ nodes: bodyEl.querySelectorAll('.mermaid') });
+        }
+
+        document.getElementById('copyBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('copyBtn');
+            try {
+                await navigator.clipboard.writeText(rawMarkdown);
+                const oldText = btn.innerHTML;
+                btn.style.background = '#10B981';
+                btn.style.borderColor = '#10B981';
+                btn.innerHTML = '已成功复制 Markdown！';
+                setTimeout(() => {
+                    btn.style.background = '';
+                    btn.style.borderColor = '';
+                    btn.innerHTML = oldText;
+                }, 2000);
+            } catch (e) {
+                alert('复制失败，请手动选取');
+            }
+        });
+
+        renderContent();
+    </script>
+</body>
+</html>

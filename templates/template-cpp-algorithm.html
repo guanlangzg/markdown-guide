@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模板 B：高频算法与 STL 题解复盘模板 | C++ 编程学习标准模板</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+
+    <style>
+        :root {
+            --bg-page: #F8FAFC;
+            --color-text: #0F172A;
+            --color-muted: #64748B;
+            --color-border: #E2E8F0;
+            --color-primary: #10B981;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-page);
+            color: var(--color-text);
+            line-height: 1.75;
+            padding: 30px 20px;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            background: #FFFFFF;
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+        }
+
+        /* 顶部导航控制条 */
+        .page-bar {
+            background: #FFFFFF;
+            border-bottom: 1px solid var(--color-border);
+            padding: 16px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .badge {
+            background: #10B98118;
+            color: #10B981;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .bar-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.15s ease;
+            border: 1px solid var(--color-border);
+            background: #FFFFFF;
+            color: var(--color-text);
+        }
+
+        .btn:hover { background: #F1F5F9; }
+        .btn-primary { background: #10B981; color: #FFFFFF; border-color: #10B981; }
+        .btn-primary:hover { opacity: 0.9; }
+
+        /* 模板信息卡 */
+        .info-card {
+            background: #F8FAFC;
+            border-bottom: 1px solid var(--color-border);
+            padding: 20px 28px;
+        }
+
+        .info-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: #1E293B;
+        }
+
+        .info-list {
+            list-style: none;
+            font-size: 13px;
+            color: var(--color-muted);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        /* 内容正文 */
+        .article-body {
+            padding: 36px 40px;
+        }
+
+        h1 { font-size: 24px; font-weight: 700; border-bottom: 1px solid var(--color-border); padding-bottom: 14px; margin-bottom: 20px; }
+        h2 { font-size: 18px; font-weight: 600; margin-top: 32px; margin-bottom: 14px; color: #1E293B; }
+        h3 { font-size: 15px; font-weight: 600; margin-top: 20px; margin-bottom: 10px; color: #334155; }
+        p { margin-bottom: 14px; }
+        
+        table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 13.5px; }
+        th, td { border: 1px solid var(--color-border); padding: 10px 14px; text-align: left; }
+        th { background: #F8FAFC; font-weight: 600; color: #334155; }
+
+        pre {
+            background: #0F172A !important;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin: 16px 0;
+            overflow-x: auto;
+            border: 1px solid #1E293B;
+        }
+
+        code { font-family: var(--font-mono); font-size: 13px; }
+        p code, li code, td code {
+            background: #F1F5F9;
+            color: #BE185D;
+            padding: 2px 5px;
+            border-radius: 4px;
+            border: 1px solid #E2E8F0;
+        }
+
+        blockquote {
+            border-left: 3px solid #10B981;
+            background: #10B98110;
+            padding: 12px 18px;
+            border-radius: 0 6px 6px 0;
+            margin: 16px 0;
+            color: #1E293B;
+        }
+
+        ul, ol { padding-left: 22px; margin-bottom: 16px; }
+        li { margin-bottom: 6px; }
+        hr { border: none; border-top: 1px solid var(--color-border); margin: 28px 0; }
+
+        /* 底部导航翻页 */
+        .footer-nav {
+            background: #F8FAFC;
+            border-top: 1px solid var(--color-border);
+            padding: 18px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header class="page-bar">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span class="badge">算法竞赛 · 题解复盘</span>
+                <strong style="font-size: 15px;">模板 B：高频算法与 STL 题解复盘模板</strong>
+            </div>
+            <div class="bar-actions">
+                <a href="./cpp-templates-showcase.html" class="btn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    <span>对比所有 4 个模板</span>
+                </a>
+                <button class="btn btn-primary" id="copyBtn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    <span>复制该模板 Markdown</span>
+                </button>
+            </div>
+        </header>
+
+        <section class="info-card">
+            <div class="info-title">🎯 模板设计意图与适用场景</div>
+            <ul class="info-list">
+                <li><strong>适用场景：</strong>双指针、滑动窗口、动态规划、单调栈、LRU/LFU 设计题、图论最短路与拓扑排序</li>
+                <li><strong>目标受众：</strong>算法刷题（力扣/Codeforces/ACM）、大厂技术面试备战、数据结构深度实战</li>
+                <li><strong>特色模块：</strong>标准化题目档案卡（题号、难度、标签、STL 容器选型）；破局思路推演与指针/状态流转 ASCII/流程图；带防御性编码的工业级 C++ 最优解（命名规范、reserve 预分配）；多解法（暴力 vs 优化 vs 终极）时空复杂度全景对比表；5 大致命 Corner Cases 边界检查清单</li>
+            </ul>
+        </section>
+
+        <main class="article-body" id="articleBody">
+            <!-- 动态渲染内容 -->
+        </main>
+
+        <footer class="footer-nav">
+            <div>
+                <a href="./template-cpp-feature.html" class="btn">← 上一个：模板 A</a>
+            </div>
+            <div>
+                <a href="./template-cpp-memory.html" class="btn">下一个：模板 C →</a>
+            </div>
+        </footer>
+    </div>
+
+    <!-- 依赖脚本 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markdown.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-c.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cmake.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+
+    <script>
+        const rawMarkdown = "# [算法题解] LeetCode 146. LRU 缓存机制 (LRU Cache)\n\n## 1. 题目档案卡 (Problem Profile)\n\n| 字段 | 内容 / 属性 |\n| :--- | :--- |\n| **题目编号** | LeetCode 146 / 剑指 Offer II 031 |\n| **题目难度** | **Medium (高频面试必考题 / 5星推荐)** |\n| **核心算法思想** | 哈希表 (Hash Map) + 双向链表 (Doubly Linked List) |\n| **推荐 STL 选型** | `std::list<std::pair<int, int>>` + `std::unordered_map<int, list_iterator>` |\n| **时空目标指标** | `get(key)` 与 `put(key, val)` 均必须严格保证 **$O(1)$ 时间复杂度** |\n\n---\n\n## 2. 破局思路与核心模型 (Core Strategy)\n\nLRU (Least Recently Used) 的本质是：**淘汰最久未使用的数据项**。\n\n1. **为什么必须双向链表？** \n   - 链表支持在已知节点指针的前提下进行 **$O(1)$ 节点的插入与删除**；\n   - 单向链表无法在 $O(1)$ 内找到前驱节点，导致删除尾部或调整节点时退化为 $O(N)$；\n2. **为什么必须哈希表？**\n   - 链表的随机查找是 $O(N)$，必须用哈希表存储 `key -> 链表节点迭代器` 实现 $O(1)$ 寻址；\n3. **STL 关键技巧 (工业级优化)**：\n   - 使用 `std::list::splice` 可以实现节点在同一链表内的**原地内存剪切移动**，完全免除先 `erase` 释放节点再 `push_front` 重新分配内存的开销！\n\n### 数据流与指针映射架构图\n```\n       std::unordered_map\n    ┌──────────┬──────────────┐\n    │ Key (1)  │  Iterator ───┼──────────┐\n    ├──────────┼──────────────┤          │\n    │ Key (2)  │  Iterator ───┼────┐     │\n    └──────────┴──────────────┘    │     │\n                                   ▼     ▼\nstd::list:  [ HEAD (Most Recent) ] <-> [ Node: 1, Val ] <-> [ Node: 2, Val ] <-> [ TAIL (Oldest) ]\n                                                                                   │\n                                                         (缓存满时淘汰 TAIL 前驱) ◄┘\n```\n\n---\n\n## 3. 工业级最优 C++ 实现 (Optimal Implementation)\n\n```cpp\n#include <iostream>\n#include <list>\n#include <unordered_map>\n#include <utility>\n#include <cassert>\n\nclass LRUCache {\nprivate:\n    using Node = std::pair<int, int>; // <key, value>\n    using ListIter = std::list<Node>::iterator;\n\n    size_t m_capacity;\n    std::list<Node> m_items;                           // 双向链表：头部最新，尾部最旧\n    std::unordered_map<int, ListIter> m_cache_map;     // 快速查找映射表\n\npublic:\n    explicit LRUCache(int capacity) : m_capacity(static_cast<size_t>(capacity)) {\n        assert(capacity > 0 && \"LRUCache capacity must be greater than zero\");\n        // 预分配桶空间，减少哈希冲突与 rehash 抖动\n        m_cache_map.reserve(m_capacity);\n    }\n\n    [[nodiscard]] int get(int key) {\n        auto it = m_cache_map.find(key);\n        if (it == m_cache_map.end()) {\n            return -1; // 未命中\n        }\n        // 黑魔法优化：splice 将该节点直接剪切移动到链表头部，耗时严格 O(1) 且无内存重分配\n        m_items.splice(m_items.begin(), m_items, it->second);\n        return it->second->second;\n    }\n\n    void put(int key, int value) {\n        auto it = m_cache_map.find(key);\n        \n        // 场景 1：key 已存在，更新值并挪到链表头部\n        if (it != m_cache_map.end()) {\n            it->second->second = value;\n            m_items.splice(m_items.begin(), m_items, it->second);\n            return;\n        }\n\n        // 场景 2：key 不存在且容量已达上限，淘汰最久未使用的尾部节点\n        if (m_items.size() >= m_capacity) {\n            int evict_key = m_items.back().first;\n            m_cache_map.erase(evict_key);\n            m_items.pop_back();\n        }\n\n        // 场景 3：新节点插入到头部并更新哈希索引\n        m_items.emplace_front(key, value);\n        m_cache_map[key] = m_items.begin();\n    }\n};\n```\n\n---\n\n## 4. 多解法对比与复杂度分析 (Solutions Comparison)\n\n| 解法策略 | 时间复杂度 (Get / Put) | 空间复杂度 | 优缺点深度评估 |\n| :--- | :--- | :--- | :--- |\n| **解法一：单数组记录时间戳** | $O(N)$ / $O(N)$ | $O(C)$ | 每次需全数组扫描极值淘汰，仅适用于 $C \\le 10$ 极微型场景 |\n| **解法二：哈希表 + 手写双向链表** | $O(1)$ / $O(1)$ | $O(C)$ | 性能最高，但代码量大（100+行），容易出现指针断裂或内存泄漏风险 |\n| **解法三：STL list::splice (推荐)** | **$O(1)$ / $O(1)$** | **$O(C)$** | **极致工业风：仅 35 行代码，复用标准库 RAII，零内存泄漏隐患** |\n\n---\n\n## 5. 边界防御与 Corner Cases 检查清单 (Edge Cases)\n\n- [x] **容量为 1 的极限边界**：插入后立即触发淘汰，需检查前驱后继指针不崩塌；\n- [x] **连续覆盖同一 Key**：调用 `put(1, 10)` 后再次 `put(1, 20)`，容量计数不可错误递增；\n- [x] **查询不存在的 Key**：返回 -1，哈希表迭代器不能越界解引用；\n- [x] **高并发安全性**：当前为单线程最优版，工业生产环境需外层套 `std::shared_mutex` 实现读写锁。\n";
+
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: 'base',
+            themeVariables: {
+                primaryColor: '#F1F5F9',
+                primaryTextColor: '#0F172A',
+                primaryBorderColor: '#64748B',
+                lineColor: '#64748B',
+                fontFamily: 'Inter, JetBrains Mono, sans-serif'
+            }
+        });
+
+        function renderContent() {
+            // 公式保护
+            const mathBlocks = [];
+            let safeMd = rawMarkdown.replace(/\$\$([\s\S]+?)\$\$/g, (m, formula) => {
+                const idx = mathBlocks.length;
+                mathBlocks.push({ type: 'block', formula });
+                return '%%KATEXBLOCK' + idx + '%%';
+            });
+            safeMd = safeMd.replace(/\$([^\$\n]+?)\$/g, (m, formula) => {
+                const idx = mathBlocks.length;
+                mathBlocks.push({ type: 'inline', formula });
+                return '%%KATEXINLINE' + idx + '%%';
+            });
+
+            let html = marked.parse(safeMd);
+
+            mathBlocks.forEach((item, idx) => {
+                const rendered = katex.renderToString(item.formula, {
+                    displayMode: item.type === 'block',
+                    throwOnError: false
+                });
+                const placeholder = item.type === 'block' ? '%%KATEXBLOCK' + idx + '%%' : '%%KATEXINLINE' + idx + '%%';
+                html = html.split(placeholder).join(rendered);
+            });
+
+            const bodyEl = document.getElementById('articleBody');
+            bodyEl.innerHTML = html;
+
+            // Prism 代码高亮
+            bodyEl.querySelectorAll('pre code').forEach(block => {
+                const lang = block.className.replace('language-', '') || 'cpp';
+                if (Prism.languages[lang]) {
+                    block.innerHTML = Prism.highlight(block.textContent, Prism.languages[lang], lang);
+                }
+            });
+
+            // Mermaid 流程图
+            const mermaidBlocks = bodyEl.querySelectorAll('pre code.language-mermaid');
+            mermaidBlocks.forEach(codeEl => {
+                const pre = codeEl.parentElement;
+                const container = document.createElement('div');
+                container.className = 'mermaid';
+                container.textContent = codeEl.textContent;
+                pre.parentNode.replaceChild(container, pre);
+            });
+            mermaid.run({ nodes: bodyEl.querySelectorAll('.mermaid') });
+        }
+
+        document.getElementById('copyBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('copyBtn');
+            try {
+                await navigator.clipboard.writeText(rawMarkdown);
+                const oldText = btn.innerHTML;
+                btn.style.background = '#10B981';
+                btn.style.borderColor = '#10B981';
+                btn.innerHTML = '已成功复制 Markdown！';
+                setTimeout(() => {
+                    btn.style.background = '';
+                    btn.style.borderColor = '';
+                    btn.innerHTML = oldText;
+                }, 2000);
+            } catch (e) {
+                alert('复制失败，请手动选取');
+            }
+        });
+
+        renderContent();
+    </script>
+</body>
+</html>

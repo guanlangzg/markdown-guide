@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模板 C：系统级底层机理与内存剖析模板 | C++ 编程学习标准模板</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+
+    <style>
+        :root {
+            --bg-page: #F8FAFC;
+            --color-text: #0F172A;
+            --color-muted: #64748B;
+            --color-border: #E2E8F0;
+            --color-primary: #8B5CF6;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-page);
+            color: var(--color-text);
+            line-height: 1.75;
+            padding: 30px 20px;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            background: #FFFFFF;
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+        }
+
+        /* 顶部导航控制条 */
+        .page-bar {
+            background: #FFFFFF;
+            border-bottom: 1px solid var(--color-border);
+            padding: 16px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .badge {
+            background: #8B5CF618;
+            color: #8B5CF6;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .bar-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.15s ease;
+            border: 1px solid var(--color-border);
+            background: #FFFFFF;
+            color: var(--color-text);
+        }
+
+        .btn:hover { background: #F1F5F9; }
+        .btn-primary { background: #8B5CF6; color: #FFFFFF; border-color: #8B5CF6; }
+        .btn-primary:hover { opacity: 0.9; }
+
+        /* 模板信息卡 */
+        .info-card {
+            background: #F8FAFC;
+            border-bottom: 1px solid var(--color-border);
+            padding: 20px 28px;
+        }
+
+        .info-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: #1E293B;
+        }
+
+        .info-list {
+            list-style: none;
+            font-size: 13px;
+            color: var(--color-muted);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        /* 内容正文 */
+        .article-body {
+            padding: 36px 40px;
+        }
+
+        h1 { font-size: 24px; font-weight: 700; border-bottom: 1px solid var(--color-border); padding-bottom: 14px; margin-bottom: 20px; }
+        h2 { font-size: 18px; font-weight: 600; margin-top: 32px; margin-bottom: 14px; color: #1E293B; }
+        h3 { font-size: 15px; font-weight: 600; margin-top: 20px; margin-bottom: 10px; color: #334155; }
+        p { margin-bottom: 14px; }
+        
+        table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 13.5px; }
+        th, td { border: 1px solid var(--color-border); padding: 10px 14px; text-align: left; }
+        th { background: #F8FAFC; font-weight: 600; color: #334155; }
+
+        pre {
+            background: #0F172A !important;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin: 16px 0;
+            overflow-x: auto;
+            border: 1px solid #1E293B;
+        }
+
+        code { font-family: var(--font-mono); font-size: 13px; }
+        p code, li code, td code {
+            background: #F1F5F9;
+            color: #BE185D;
+            padding: 2px 5px;
+            border-radius: 4px;
+            border: 1px solid #E2E8F0;
+        }
+
+        blockquote {
+            border-left: 3px solid #8B5CF6;
+            background: #8B5CF610;
+            padding: 12px 18px;
+            border-radius: 0 6px 6px 0;
+            margin: 16px 0;
+            color: #1E293B;
+        }
+
+        ul, ol { padding-left: 22px; margin-bottom: 16px; }
+        li { margin-bottom: 6px; }
+        hr { border: none; border-top: 1px solid var(--color-border); margin: 28px 0; }
+
+        /* 底部导航翻页 */
+        .footer-nav {
+            background: #F8FAFC;
+            border-top: 1px solid var(--color-border);
+            padding: 18px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header class="page-bar">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span class="badge">系统编程 · 内存模型</span>
+                <strong style="font-size: 15px;">模板 C：系统级底层机理与内存剖析模板</strong>
+            </div>
+            <div class="bar-actions">
+                <a href="./cpp-templates-showcase.html" class="btn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    <span>对比所有 4 个模板</span>
+                </a>
+                <button class="btn btn-primary" id="copyBtn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    <span>复制该模板 Markdown</span>
+                </button>
+            </div>
+        </header>
+
+        <section class="info-card">
+            <div class="info-title">🎯 模板设计意图与适用场景</div>
+            <ul class="info-list">
+                <li><strong>适用场景：</strong>虚函数表 (vtable) 内存布局、内存对齐与 Padding、Cache-Line 伪共享、智能指针引用计数块、UAF/Double-Free 底层成因</li>
+                <li><strong>目标受众：</strong>计算机体系结构深入者、Linux 高性能后端工程师、性能调优与故障排查专家</li>
+                <li><strong>特色模块：</strong>64 位内存字节布局剖析 (精准标注 8 字节对齐、Padding、vptr offset)；C++ 源码 vs x86-64 汇编指令间接寻址对照；典型灾难现场剖析（对象切片、未定义行为、野指针踩踏）；GDB、Valgrind、ASan (AddressSanitizer) 实战排障命令速查；静态多态（CRTP / std::variant）高性能替代方案</li>
+            </ul>
+        </section>
+
+        <main class="article-body" id="articleBody">
+            <!-- 动态渲染内容 -->
+        </main>
+
+        <footer class="footer-nav">
+            <div>
+                <a href="./template-cpp-algorithm.html" class="btn">← 上一个：模板 B</a>
+            </div>
+            <div>
+                <a href="./template-cpp-architecture.html" class="btn">下一个：模板 D →</a>
+            </div>
+        </footer>
+    </div>
+
+    <!-- 依赖脚本 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markdown.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-c.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cmake.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+
+    <script>
+        const rawMarkdown = "# [系统底层] C++ 虚函数表 (vtable) 与对象内存布局剖析\n\n## 1. 机制背景与硬件抽象 (System Context)\n\n在 C++ 中，动态多态（运行时多态）依赖虚函数机制实现。然而，C++ 奉行“不为你不需要的东西付出代价”的零成本抽象原则：\n- **普通类对象**：大小完全由成员变量和对齐决定，无任何隐式附加字段；\n- **包含虚函数的类**：编译器会在对象起始地址注入一个隐藏的指针：**虚函数表指针 (`vptr`)**，占用 8 字节（64位体系）。\n\n---\n\n## 2. 64 位体系下对象内存布局图解 (Memory Layout)\n\n### 2.1 案例类定义\n```cpp\nclass Base {\n    int a;              // 4 字节\n    virtual void f();   // 虚函数\n};\n\nclass Derived : public Base {\n    char b;             // 1 字节\n    virtual void f() override;\n    virtual void g();   // 新虚函数\n};\n```\n\n### 2.2 精确字节对齐与内存分布 (ASCII Layout)\n```\nDerived 对象在 64-bit 系统的内存分布 (sizeof(Derived) == 16 字节):\n地址偏移 (Offset)\n 0x00 ┌────────────────────────────────────────┐ ◄── Derived 对象的首地址 (this 指针)\n      │  vptr (虚函数表指针，指向 Derived vtable) │  [ 8 字节: 0x00 ~ 0x07 ]\n 0x08 ├───────────────────┬────────────────────┤\n      │  int a (Base 成员) │ Padding 填充对齐空洞│  [ 4 字节 a + 4 字节 padding: 0x08 ~ 0x0F ]\n 0x0C ├───────────────────┴────────────────────┤\n      │  char b (Derived)  │ Padding 填充对齐空洞│  [ 1 字节 b + 7 字节 padding: 0x10 ~ 0x17 ]\n 0x18 └────────────────────────────────────────┘\n      总大小 (sizeof) 经 8 字节边界对齐后为 24 字节！\n```\n\n---\n\n## 3. C++ 源码与汇编间接寻址对照 (Assembly Comparison)\n\n### 3.1 动态调用源码\n```cpp\nvoid invoke(Base* ptr) {\n    ptr->f(); // 多态调用\n}\n```\n\n### 3.2 编译为 x86-64 汇编 (通过 Godbolt Compiler Explorer)\n```assembly\ninvoke(Base*):\n    mov   rax, qword ptr [rdi]        ; 1. 取出 ptr 对象首地址的 vptr 放入 rax\n    mov   rax, qword ptr [rax]        ; 2. 从 vtable 中查出第一个虚函数 f() 的真实函数指针\n    jmp   rax                         ; 3. 间接跳转执行 (Tail Call 优化)\n```\n> **性能损耗根因**：\n> 1. **两次内存间接寻址 (Double Dereferencing)**；\n> 2. **破坏 CPU 分支预测器 (Branch Predictor)**，可能引发流水线清空 (Pipeline Flush)；\n> 3. **阻止编译器函数内联 (Inlining)**。\n\n---\n\n## 4. 典型致命反模式剖析 (Critical Anti-Patterns)\n\n### 4.1 构造/析构函数中调用虚函数 (Undefined Behavioral Trap)\n```cpp\n// ❌ 灾难写法：子类特有的资源尚未初始化完成！\nclass Base {\npublic:\n    Base() { setup(); } // 此时调用的永远是 Base::setup()，绝对不会动态分派到子类！\n    virtual void setup() { /* ... */ }\n};\n```\n\n### 4.2 基类析构函数未声明为 virtual\n```cpp\n// ❌ 内存泄漏灾难：使用基类指针 delete 子类对象时发生切片泄漏\nBase* p = new Derived();\ndelete p; // 若 Base 析构函数不是 virtual，只调用 Base 析构，Derived 子类资源永远泄漏！\n```\n\n---\n\n## 5. 调试诊断工具与实操指令 (Debugging Arsenal)\n\n```bash\n# 1. 打印 Clang 生成的完整类内存布局与虚表分布 (极其强悍的底层学习利器)\nclang++ -cc1 -fdump-record-layouts -fdump-vtable-layouts main.cpp\n\n# 2. 编译并注入 AddressSanitizer 捕获虚表野指针篡改与 UAF\ng++ -std=c++20 -O1 -g -fsanitize=address,undefined main.cpp -o main\n./main\n\n# 3. GDB 调试器中直接查看对象的 vptr 与 vtable 内容\n(gdb) x/4gx ptr               # 查看对象前 32 字节内存十六进制\n(gdb) info vtbl ptr           # GDB 原生解析当前指针所指的虚函数表清单\n```\n";
+
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: 'base',
+            themeVariables: {
+                primaryColor: '#F1F5F9',
+                primaryTextColor: '#0F172A',
+                primaryBorderColor: '#64748B',
+                lineColor: '#64748B',
+                fontFamily: 'Inter, JetBrains Mono, sans-serif'
+            }
+        });
+
+        function renderContent() {
+            // 公式保护
+            const mathBlocks = [];
+            let safeMd = rawMarkdown.replace(/\$\$([\s\S]+?)\$\$/g, (m, formula) => {
+                const idx = mathBlocks.length;
+                mathBlocks.push({ type: 'block', formula });
+                return '%%KATEXBLOCK' + idx + '%%';
+            });
+            safeMd = safeMd.replace(/\$([^\$\n]+?)\$/g, (m, formula) => {
+                const idx = mathBlocks.length;
+                mathBlocks.push({ type: 'inline', formula });
+                return '%%KATEXINLINE' + idx + '%%';
+            });
+
+            let html = marked.parse(safeMd);
+
+            mathBlocks.forEach((item, idx) => {
+                const rendered = katex.renderToString(item.formula, {
+                    displayMode: item.type === 'block',
+                    throwOnError: false
+                });
+                const placeholder = item.type === 'block' ? '%%KATEXBLOCK' + idx + '%%' : '%%KATEXINLINE' + idx + '%%';
+                html = html.split(placeholder).join(rendered);
+            });
+
+            const bodyEl = document.getElementById('articleBody');
+            bodyEl.innerHTML = html;
+
+            // Prism 代码高亮
+            bodyEl.querySelectorAll('pre code').forEach(block => {
+                const lang = block.className.replace('language-', '') || 'cpp';
+                if (Prism.languages[lang]) {
+                    block.innerHTML = Prism.highlight(block.textContent, Prism.languages[lang], lang);
+                }
+            });
+
+            // Mermaid 流程图
+            const mermaidBlocks = bodyEl.querySelectorAll('pre code.language-mermaid');
+            mermaidBlocks.forEach(codeEl => {
+                const pre = codeEl.parentElement;
+                const container = document.createElement('div');
+                container.className = 'mermaid';
+                container.textContent = codeEl.textContent;
+                pre.parentNode.replaceChild(container, pre);
+            });
+            mermaid.run({ nodes: bodyEl.querySelectorAll('.mermaid') });
+        }
+
+        document.getElementById('copyBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('copyBtn');
+            try {
+                await navigator.clipboard.writeText(rawMarkdown);
+                const oldText = btn.innerHTML;
+                btn.style.background = '#10B981';
+                btn.style.borderColor = '#10B981';
+                btn.innerHTML = '已成功复制 Markdown！';
+                setTimeout(() => {
+                    btn.style.background = '';
+                    btn.style.borderColor = '';
+                    btn.innerHTML = oldText;
+                }, 2000);
+            } catch (e) {
+                alert('复制失败，请手动选取');
+            }
+        });
+
+        renderContent();
+    </script>
+</body>
+</html>

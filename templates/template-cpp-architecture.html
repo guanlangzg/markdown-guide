@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模板 D：企业级面向对象与工程架构设计模板 | C++ 编程学习标准模板</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+
+    <style>
+        :root {
+            --bg-page: #F8FAFC;
+            --color-text: #0F172A;
+            --color-muted: #64748B;
+            --color-border: #E2E8F0;
+            --color-primary: #F59E0B;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-page);
+            color: var(--color-text);
+            line-height: 1.75;
+            padding: 30px 20px;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            background: #FFFFFF;
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+        }
+
+        /* 顶部导航控制条 */
+        .page-bar {
+            background: #FFFFFF;
+            border-bottom: 1px solid var(--color-border);
+            padding: 16px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .badge {
+            background: #F59E0B18;
+            color: #F59E0B;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .bar-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.15s ease;
+            border: 1px solid var(--color-border);
+            background: #FFFFFF;
+            color: var(--color-text);
+        }
+
+        .btn:hover { background: #F1F5F9; }
+        .btn-primary { background: #F59E0B; color: #FFFFFF; border-color: #F59E0B; }
+        .btn-primary:hover { opacity: 0.9; }
+
+        /* 模板信息卡 */
+        .info-card {
+            background: #F8FAFC;
+            border-bottom: 1px solid var(--color-border);
+            padding: 20px 28px;
+        }
+
+        .info-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: #1E293B;
+        }
+
+        .info-list {
+            list-style: none;
+            font-size: 13px;
+            color: var(--color-muted);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        /* 内容正文 */
+        .article-body {
+            padding: 36px 40px;
+        }
+
+        h1 { font-size: 24px; font-weight: 700; border-bottom: 1px solid var(--color-border); padding-bottom: 14px; margin-bottom: 20px; }
+        h2 { font-size: 18px; font-weight: 600; margin-top: 32px; margin-bottom: 14px; color: #1E293B; }
+        h3 { font-size: 15px; font-weight: 600; margin-top: 20px; margin-bottom: 10px; color: #334155; }
+        p { margin-bottom: 14px; }
+        
+        table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 13.5px; }
+        th, td { border: 1px solid var(--color-border); padding: 10px 14px; text-align: left; }
+        th { background: #F8FAFC; font-weight: 600; color: #334155; }
+
+        pre {
+            background: #0F172A !important;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin: 16px 0;
+            overflow-x: auto;
+            border: 1px solid #1E293B;
+        }
+
+        code { font-family: var(--font-mono); font-size: 13px; }
+        p code, li code, td code {
+            background: #F1F5F9;
+            color: #BE185D;
+            padding: 2px 5px;
+            border-radius: 4px;
+            border: 1px solid #E2E8F0;
+        }
+
+        blockquote {
+            border-left: 3px solid #F59E0B;
+            background: #F59E0B10;
+            padding: 12px 18px;
+            border-radius: 0 6px 6px 0;
+            margin: 16px 0;
+            color: #1E293B;
+        }
+
+        ul, ol { padding-left: 22px; margin-bottom: 16px; }
+        li { margin-bottom: 6px; }
+        hr { border: none; border-top: 1px solid var(--color-border); margin: 28px 0; }
+
+        /* 底部导航翻页 */
+        .footer-nav {
+            background: #F8FAFC;
+            border-top: 1px solid var(--color-border);
+            padding: 18px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header class="page-bar">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span class="badge">工程架构 · 规范范式</span>
+                <strong style="font-size: 15px;">模板 D：企业级面向对象与工程架构设计模板</strong>
+            </div>
+            <div class="bar-actions">
+                <a href="./cpp-templates-showcase.html" class="btn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    <span>对比所有 4 个模板</span>
+                </a>
+                <button class="btn btn-primary" id="copyBtn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    <span>复制该模板 Markdown</span>
+                </button>
+            </div>
+        </header>
+
+        <section class="info-card">
+            <div class="info-title">🎯 模板设计意图与适用场景</div>
+            <ul class="info-list">
+                <li><strong>适用场景：</strong>现代化 RAII 连接池、Pimpl 编译防火墙模式、Rule of 5/0 移动语义契约、现代化 CMakeLists 构建体系、GoogleTest 单元测试规范</li>
+                <li><strong>目标受众：</strong>大型 C++ 基础库/业务架构师、遵循 Google C++ 规范的团队成员</li>
+                <li><strong>特色模块：</strong>组件边界契约与接口/实现严格解耦；Mermaid 软件架构图与所有权关系 (Ownership Hierarchy)；现代 C++ Rule of 5 规范代码模版 (禁用隐式转换、[[nodiscard]]、noexcept)；生产级标准 CMake 构建配置清单 (现代化 Target 体系)；GoogleTest 工业级单元测试夹具与并发断言</li>
+            </ul>
+        </section>
+
+        <main class="article-body" id="articleBody">
+            <!-- 动态渲染内容 -->
+        </main>
+
+        <footer class="footer-nav">
+            <div>
+                <a href="./template-cpp-memory.html" class="btn">← 上一个：模板 C</a>
+            </div>
+            <div>
+                
+            </div>
+        </footer>
+    </div>
+
+    <!-- 依赖脚本 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markdown.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-c.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cmake.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+
+    <script>
+        const rawMarkdown = "# [工程架构] 现代 C++ RAII 资源管理池与 Pimpl 惯用法\n\n## 1. 模块定位与职责契约 (Contract & Specification)\n\n| 架构维度 | 工业规范要求 |\n| :--- | :--- |\n| **设计模式** | Pimpl (Pointer to Implementation) 编译防火墙 + RAII 资源所有权自动管理 |\n| **ABI 稳定性** | 头文件完全隐藏私有成员与三方平台依赖库，私有变动**无需重新编译下游依赖模块** |\n| **所有权语义** | 独占所有权 (`std::unique_ptr`)，严格遵守 **Rule of 5 (五法则)** |\n| **异常安全保证** | 强异常安全保证 (Strong Exception Safety) |\n\n---\n\n## 2. 架构关系与所有权设计 (Ownership Architecture)\n\n```mermaid\nclassDiagram\n    direction LR\n    class NetworkConnectionPool {\n        +NetworkConnectionPool(size_t max_conns)\n        +acquire() ScopedConnection\n        +release(ScopedConnection)\n        -std::unique_ptr~Impl~ pimpl_\n    }\n    class Impl {\n        -std::queue~RawSocket~ idle_pool_\n        -std::mutex mtx_\n        -std::condition_variable cv_\n        +get_socket()\n    }\n    class ScopedConnection {\n        +send(buffer)\n        +~ScopedConnection()\n        -NetworkConnectionPool* pool_ref_\n    }\n\n    NetworkConnectionPool *-- Impl : 独占所有权 (unique_ptr)\n    ScopedConnection ..> NetworkConnectionPool : RAII 生命周期自动归还\n```\n\n---\n\n## 3. 规范级头文件设计 (`ConnectionPool.hpp`)\n\n```cpp\n#pragma once\n#include <memory>\n#include <string_view>\n#include <chrono>\n\nnamespace core::net {\n\nclass ConnectionPool {\npublic:\n    // 1. 明确禁用隐式类型转换\n    explicit ConnectionPool(size_t pool_size);\n    \n    // 2. 现代 C++ Rule of 5 规范：Pimpl 析构函数必须在实现文件中定义\n    ~ConnectionPool();\n    \n    // 3. 禁用拷贝语义（独占资源池禁止浅拷贝）\n    ConnectionPool(const ConnectionPool&) = delete;\n    ConnectionPool& operator=(const ConnectionPool&) = delete;\n\n    // 4. 显式支持高效移动语义\n    ConnectionPool(ConnectionPool&&) noexcept;\n    ConnectionPool& operator=(ConnectionPool&&) noexcept;\n\n    // 5. 使用 [[nodiscard]] 强制调用方必须检查返回值\n    [[nodiscard]] bool acquire_connection(std::string_view endpoint, \n                                          std::chrono::milliseconds timeout);\n\nprivate:\n    class Impl;                       // 前置声明前向类\n    std::unique_ptr<Impl> pimpl_;     // 编译防火墙指针\n};\n\n} // namespace core::net\n```\n\n---\n\n## 4. 现代 CMake 构建配置 (`CMakeLists.txt`)\n\n现代化 CMake 严格基于 **Target (目标)** 驱动，杜绝使用过时的全局 `include_directories`：\n\n```cmake\ncmake_minimum_required(VERSION 3.20)\nproject(ModernCppEngine VERSION 1.0.0 LANGUAGES CXX)\n\nset(CMAKE_CXX_STANDARD 20)\nset(CMAKE_CXX_STANDARD_REQUIRED ON)\nset(CMAKE_CXX_EXTENSIONS OFF)\n\n# 声明核心静态库\nadd_library(net_engine STATIC\n    src/ConnectionPool.cpp\n)\n\n# 现代化 Target 包含目录：构建时内部引用，安装后外部引用\ntarget_include_directories(net_engine\n    PUBLIC\n        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>\n        $<INSTALL_INTERFACE:include>\n    PRIVATE\n        src\n)\n\n# 开启严格编译器告警\ntarget_compile_options(net_engine PRIVATE\n    $<$<CXX_COMPILER_ID:GNU,Clang>: -Wall -Wextra -Wpedantic -Werror>\n    $<$<CXX_COMPILER_ID:MSVC>: /W4 /WX>\n)\n```\n\n---\n\n## 5. GoogleTest 单元测试范本 (`test_pool.cpp`)\n\n```cpp\n#include <gtest/gtest.h>\n#include \"ConnectionPool.hpp\"\n#include <thread>\n#include <vector>\n\nclass ConnectionPoolTest : public ::testing::Test {\nprotected:\n    void SetUp() override {\n        pool = std::make_unique<core::net::ConnectionPool>(5);\n    }\n    \n    void TearDown() override {\n        pool.reset();\n    }\n\n    std::unique_ptr<core::net::ConnectionPool> pool;\n};\n\n// 验证多线程并发获取连接时的线程安全与无死锁\nTEST_F(ConnectionPoolTest, ConcurrentAcquireSafety) {\n    constexpr int THREAD_COUNT = 10;\n    std::vector<std::thread> workers;\n    std::atomic<int> success_count{0};\n\n    for (int i = 0; i < THREAD_COUNT; ++i) {\n        workers.emplace_back([this, &success_count]() {\n            if (pool->acquire_connection(\"127.0.0.1:8080\", std::chrono::milliseconds(200))) {\n                success_count.fetch_add(1, std::memory_order_relaxed);\n            }\n        });\n    }\n\n    for (auto& t : workers) {\n        if (t.joinable()) t.join();\n    }\n\n    EXPECT_LE(success_count.load(), 5); // 确保不超过最大连接数\n}\n```\n";
+
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: 'base',
+            themeVariables: {
+                primaryColor: '#F1F5F9',
+                primaryTextColor: '#0F172A',
+                primaryBorderColor: '#64748B',
+                lineColor: '#64748B',
+                fontFamily: 'Inter, JetBrains Mono, sans-serif'
+            }
+        });
+
+        function renderContent() {
+            // 公式保护
+            const mathBlocks = [];
+            let safeMd = rawMarkdown.replace(/\$\$([\s\S]+?)\$\$/g, (m, formula) => {
+                const idx = mathBlocks.length;
+                mathBlocks.push({ type: 'block', formula });
+                return '%%KATEXBLOCK' + idx + '%%';
+            });
+            safeMd = safeMd.replace(/\$([^\$\n]+?)\$/g, (m, formula) => {
+                const idx = mathBlocks.length;
+                mathBlocks.push({ type: 'inline', formula });
+                return '%%KATEXINLINE' + idx + '%%';
+            });
+
+            let html = marked.parse(safeMd);
+
+            mathBlocks.forEach((item, idx) => {
+                const rendered = katex.renderToString(item.formula, {
+                    displayMode: item.type === 'block',
+                    throwOnError: false
+                });
+                const placeholder = item.type === 'block' ? '%%KATEXBLOCK' + idx + '%%' : '%%KATEXINLINE' + idx + '%%';
+                html = html.split(placeholder).join(rendered);
+            });
+
+            const bodyEl = document.getElementById('articleBody');
+            bodyEl.innerHTML = html;
+
+            // Prism 代码高亮
+            bodyEl.querySelectorAll('pre code').forEach(block => {
+                const lang = block.className.replace('language-', '') || 'cpp';
+                if (Prism.languages[lang]) {
+                    block.innerHTML = Prism.highlight(block.textContent, Prism.languages[lang], lang);
+                }
+            });
+
+            // Mermaid 流程图
+            const mermaidBlocks = bodyEl.querySelectorAll('pre code.language-mermaid');
+            mermaidBlocks.forEach(codeEl => {
+                const pre = codeEl.parentElement;
+                const container = document.createElement('div');
+                container.className = 'mermaid';
+                container.textContent = codeEl.textContent;
+                pre.parentNode.replaceChild(container, pre);
+            });
+            mermaid.run({ nodes: bodyEl.querySelectorAll('.mermaid') });
+        }
+
+        document.getElementById('copyBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('copyBtn');
+            try {
+                await navigator.clipboard.writeText(rawMarkdown);
+                const oldText = btn.innerHTML;
+                btn.style.background = '#10B981';
+                btn.style.borderColor = '#10B981';
+                btn.innerHTML = '已成功复制 Markdown！';
+                setTimeout(() => {
+                    btn.style.background = '';
+                    btn.style.borderColor = '';
+                    btn.innerHTML = oldText;
+                }, 2000);
+            } catch (e) {
+                alert('复制失败，请手动选取');
+            }
+        });
+
+        renderContent();
+    </script>
+</body>
+</html>

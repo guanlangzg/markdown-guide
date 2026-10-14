@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C++ 编程学习模板选型与对比中心 | Modern C++ Learning Templates</title>
+    
+    <!-- 引入专业技术字体：Inter (UI) 与 JetBrains Mono (代码) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- KaTeX 数学公式样式 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+
+    <!-- Prism 现代 Dark Slate 主题 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+
+    <style>
+        :root {
+            --bg-page: #F8FAFC;
+            --bg-card: #FFFFFF;
+            --color-text-main: #0F172A;
+            --color-text-muted: #64748B;
+            --color-border: #E2E8F0;
+            --color-border-subtle: #F1F5F9;
+            --color-primary: #2563EB;
+            --color-primary-hover: #1D4ED8;
+            --color-success: #10B981;
+            --code-bg: #0F172A;
+            --code-text: #F8FAFC;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+            --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+            --shadow-float: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-page);
+            color: var(--color-text-main);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 顶部导航与 Header */
+        .showcase-header {
+            background: #FFFFFF;
+            border-bottom: 1px solid var(--color-border);
+            padding: 16px 28px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            background: #EFF6FF;
+            color: #2563EB;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .brand-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--color-text-main);
+            letter-spacing: -0.02em;
+        }
+
+        .actions-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 14px;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-decoration: none;
+            border: 1px solid transparent;
+        }
+
+        .btn-outline {
+            background: #FFFFFF;
+            border-color: var(--color-border);
+            color: var(--color-text-main);
+        }
+        .btn-outline:hover {
+            background: #F8FAFC;
+            border-color: #CBD5E1;
+        }
+
+        .btn-primary {
+            background: var(--color-primary);
+            color: #FFFFFF;
+        }
+        .btn-primary:hover {
+            background: var(--color-primary-hover);
+        }
+
+        .btn-success {
+            background: #ECFDF5;
+            color: var(--color-success);
+            border-color: #A7F3D0;
+        }
+
+        /* 模板选择卡片网格 */
+        .selector-section {
+            max-width: 1600px;
+            margin: 20px auto 0;
+            padding: 0 28px;
+        }
+
+        .selector-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 14px;
+        }
+
+        .template-card {
+            background: #FFFFFF;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            text-align: left;
+        }
+
+        .template-card.featured {
+            border: 1.5px solid #6366F1;
+            background: linear-gradient(180deg, #FFFFFF 0%, #F5F3FF 100%);
+        }
+
+        .template-card:hover {
+            border-color: #94A3B8;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-float);
+        }
+
+        .template-card.active {
+            border-color: var(--color-primary);
+            background: #FAF5FF;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+        }
+
+        .card-tag {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            padding: 3px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--color-text-main);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-desc {
+            font-size: 12px;
+            color: var(--color-text-muted);
+            line-height: 1.4;
+        }
+
+        /* 主工作区分栏：Dark Slate 源码区 + Paper White 渲染区 */
+        .workspace {
+            max-width: 1600px;
+            margin: 20px auto 40px;
+            padding: 0 28px;
+        }
+
+        .view-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #FFFFFF;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md) var(--radius-md) 0 0;
+            padding: 10px 18px;
+        }
+
+        .view-tabs {
+            display: flex;
+            background: #F1F5F9;
+            padding: 3px;
+            border-radius: var(--radius-sm);
+            gap: 4px;
+        }
+
+        .view-tab {
+            border: none;
+            background: transparent;
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--color-text-muted);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .view-tab.active {
+            background: #FFFFFF;
+            color: var(--color-text-main);
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .content-panes {
+            display: grid;
+            grid-template-columns: 46% 54%;
+            background: #FFFFFF;
+            border: 1px solid var(--color-border);
+            border-top: none;
+            border-radius: 0 0 var(--radius-md) var(--radius-md);
+            overflow: hidden;
+            min-height: 750px;
+        }
+
+        .content-panes.mode-preview {
+            grid-template-columns: 1fr;
+        }
+        .content-panes.mode-preview .source-pane {
+            display: none;
+        }
+
+        .content-panes.mode-source {
+            grid-template-columns: 1fr;
+        }
+        .content-panes.mode-source .preview-pane {
+            display: none;
+        }
+
+        /* 左侧深板岩源码区 */
+        .source-pane {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pane-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 18px;
+            font-size: 12px;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(0, 0, 0, 0.2);
+            color: #94A3B8;
+        }
+
+        .source-code-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 800px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            line-height: 1.65;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        /* 右侧仿纸纯白渲染区 */
+        .preview-pane {
+            background-color: #FFFFFF;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .preview-pane .pane-bar {
+            background: #F8FAFC;
+            border-bottom: 1px solid var(--color-border);
+            color: var(--color-text-muted);
+        }
+
+        .rendered-article {
+            flex: 1;
+            padding: 32px 40px;
+            overflow-y: auto;
+            max-height: 800px;
+            color: #1E293B;
+            font-size: 14.5px;
+            line-height: 1.75;
+        }
+
+        /* 渲染技术文章精细排版 */
+        .rendered-article h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #0F172A;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+            border-bottom: 1px solid var(--color-border);
+            padding-bottom: 12px;
+        }
+
+        .rendered-article h2 {
+            font-size: 17px;
+            font-weight: 600;
+            color: #1E293B;
+            margin-top: 28px;
+            margin-bottom: 12px;
+            letter-spacing: -0.01em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .rendered-article h3 {
+            font-size: 15px;
+            font-weight: 600;
+            color: #334155;
+            margin-top: 18px;
+            margin-bottom: 8px;
+        }
+
+        .rendered-article p {
+            margin-bottom: 12px;
+        }
+
+        .rendered-article table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 13px;
+        }
+
+        .rendered-article th, .rendered-article td {
+            border: 1px solid var(--color-border);
+            padding: 9px 14px;
+            text-align: left;
+        }
+
+        .rendered-article th {
+            background-color: #F8FAFC;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .rendered-article pre {
+            background: #0F172A !important;
+            border-radius: var(--radius-sm);
+            padding: 14px 18px;
+            margin: 14px 0;
+            overflow-x: auto;
+            border: 1px solid #1E293B;
+        }
+
+        .rendered-article code {
+            font-family: var(--font-mono);
+            font-size: 13px;
+        }
+
+        .rendered-article p code, .rendered-article li code, .rendered-article td code {
+            background: #F1F5F9;
+            color: #BE185D;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-size: 12.5px;
+            border: 1px solid #E2E8F0;
+        }
+
+        .rendered-article blockquote {
+            border-left: 3px solid var(--color-primary);
+            background: #EFF6FF;
+            padding: 10px 16px;
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            margin: 14px 0;
+            color: #1E3A8A;
+            font-size: 13.5px;
+        }
+
+        .rendered-article ul, .rendered-article ol {
+            padding-left: 20px;
+            margin-bottom: 14px;
+        }
+
+        .rendered-article li {
+            margin-bottom: 4px;
+        }
+
+        .rendered-article hr {
+            border: none;
+            border-top: 1px solid var(--color-border);
+            margin: 24px 0;
+        }
+
+        /* 选型雷达与对比表 */
+        .comparison-section {
+            max-width: 1600px;
+            margin: 0 auto 60px;
+            padding: 0 28px;
+        }
+
+        .comparison-card {
+            background: #FFFFFF;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .comparison-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--color-text-main);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .table-compare {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .table-compare th, .table-compare td {
+            border: 1px solid var(--color-border);
+            padding: 10px 14px;
+            text-align: left;
+        }
+
+        .table-compare th {
+            background: #F8FAFC;
+            font-weight: 600;
+        }
+
+        .score-star {
+            color: #F59E0B;
+            font-weight: 600;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 1100px) {
+            .selector-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .content-panes {
+                grid-template-columns: 1fr;
+            }
+            .source-pane {
+                border-right: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 顶部导航 -->
+    <header class="showcase-header">
+        <div class="header-top">
+            <div class="brand">
+                <span class="brand-badge">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="16 18 22 12 16 6"></polyline>
+                        <polyline points="8 6 2 12 8 18"></polyline>
+                    </svg>
+                    C++ 进阶学习方案
+                </span>
+                <h1 class="brand-title">C++ 编程学习模板选型与对比中心</h1>
+            </div>
+            <div class="actions-group">
+                <button class="btn btn-outline" id="copyMarkdownBtn" type="button">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    <span>复制 Markdown 源码</span>
+                </button>
+                <button class="btn btn-outline" id="downloadMdBtn" type="button">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    <span>下载 .md 文件</span>
+                </button>
+                <a href="../index.html" class="btn btn-primary">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    <span>返回速查手册</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 4 大模板选择区 -->
+    <section class="selector-section">
+        <div class="selector-grid" id="templateGrid">
+            <!-- 动态生成 4 张卡片 -->
+        </div>
+    </section>
+
+    <!-- 工作区：双栏对照 -->
+    <main class="workspace">
+        <div class="view-controls">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span id="currentTemplateBadge" style="font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: #DBEAFE; color: #1D4ED8;">模板 A</span>
+                <strong id="currentTemplateTitle" style="font-size: 14px;">现代 C++ 特性精讲与对比模板</strong>
+            </div>
+            <div class="view-tabs">
+                <button class="view-tab active" data-mode="split">双栏对照 (Split)</button>
+                <button class="view-tab" data-mode="preview">仿纸渲染 (Preview)</button>
+                <button class="view-tab" data-mode="source">源码模式 (Markdown)</button>
+            </div>
+        </div>
+
+        <div class="content-panes" id="contentPanes">
+            <!-- 左侧深板岩源码区 -->
+            <div class="source-pane">
+                <div class="pane-bar">
+                    <span>Markdown 源码 (Dark Slate #0F172A)</span>
+                    <span id="charCount" style="font-family: var(--font-mono); font-size: 11px;">0 字符</span>
+                </div>
+                <div class="source-code-container" id="sourceCode"></div>
+            </div>
+
+            <!-- 右侧仿纸纯白渲染区 -->
+            <div class="preview-pane">
+                <div class="pane-bar">
+                    <span>HTML 渲染效果 (Paper White #FFFFFF)</span>
+                    <span style="font-size: 11px; color: #64748B;">KaTeX + JetBrains Mono + 1px Border</span>
+                </div>
+                <article class="rendered-article" id="renderedOutput"></article>
+            </div>
+        </div>
+    </main>
+
+    <!-- 底部选型建议与对比评估 -->
+    <section class="comparison-section">
+        <div class="comparison-card">
+            <div class="comparison-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+                <span>C++ 编程与算法学习模板多维度选型指南与场景打分</span>
+            </div>
+            <table class="table-compare">
+                <thead>
+                    <tr>
+                        <th style="width: 22%;">模板名称</th>
+                        <th style="width: 26%;">核心特色模块</th>
+                        <th style="width: 17%;">算法刷题&题解</th>
+                        <th style="width: 17%;">路径备忘打卡</th>
+                        <th style="width: 18%;">现代语法与规范</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="background: #F5F3FF;">
+                        <td><strong style="color: #4F46E5;">⭐ 官方首推：LeetCode 题解复盘与算法路径全能模板 (A+B融合版)</strong></td>
+                        <td>题目档案卡 + 知识树专题路径 + 艾宾浩斯复习打卡 + 破局闪念卡 + 滑窗推导图 + 现代C++20最优解 + 5大Corner Cases</td>
+                        <td><span class="score-star">★★★★★</span> (满分首选)</td>
+                        <td><span class="score-star">★★★★★</span> (专为备忘打造)</td>
+                        <td><span class="score-star">★★★★★</span> (C++20标准)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>模板 A：现代 C++ 特性精解</strong></td>
+                        <td>C++98 vs C++20 对照表、零开销原理、Do's & Don'ts</td>
+                        <td><span class="score-star">★★★☆☆</span> (中等)</td>
+                        <td><span class="score-star">★★★☆☆</span> (偏语法演进)</td>
+                        <td><span class="score-star">★★★★★</span> (语法标准推荐)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>模板 B：高频算法与题解复盘</strong></td>
+                        <td>题目档案卡、splice原地剪切、Corner Cases防御、多解法复杂度</td>
+                        <td><span class="score-star">★★★★★</span> (力扣/ACM必备)</td>
+                        <td><span class="score-star">★★★★☆</span> (经典题解)</td>
+                        <td><span class="score-star">★★★☆☆</span> (聚焦算法逻辑)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>模板 C：系统底层机理与内存剖析</strong></td>
+                        <td>64位内存偏移布局图、x86-64汇编对照、GDB/ASan命令速查</td>
+                        <td><span class="score-star">★★★★☆</span> (进阶性能)</td>
+                        <td><span class="score-star">★★★☆☆</span> (偏底层排查)</td>
+                        <td><span class="score-star">★★★★★</span> (大厂硬核必考)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>模板 D：企业级工程架构与设计</strong></td>
+                        <td>Pimpl模式、Rule of 5规范、Mermaid架构图、CMake+GTest</td>
+                        <td><span class="score-star">★★☆☆☆</span> (不适合刷题)</td>
+                        <td><span class="score-star">★★☆☆☆</span> (偏工程交付)</td>
+                        <td><span class="score-star">★★★★★</span> (开源库/大项目规范)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- 依赖脚本 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markdown.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-c.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cmake.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    
+    <!-- 数据文件 -->
+    <script src="./templates-data.js"></script>
+
+    <script>
+        // 初始化 Mermaid
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: 'base',
+            themeVariables: {
+                primaryColor: '#F1F5F9',
+                primaryTextColor: '#0F172A',
+                primaryBorderColor: '#64748B',
+                lineColor: '#64748B',
+                fontFamily: 'Inter, JetBrains Mono, sans-serif',
+                fontSize: '13px'
+            }
+        });
+
+        let currentActiveIndex = 0;
+
+        function renderSelectorCards() {
+            const grid = document.getElementById('templateGrid');
+            grid.innerHTML = CPP_TEMPLATES.map((tmpl, idx) => `
+                <div class="template-card ${idx === 0 ? 'featured' : ''} ${idx === currentActiveIndex ? 'active' : ''}" data-index="${idx}">
+                    <span class="card-tag" style="background: ${tmpl.color}15; color: ${tmpl.color};">${tmpl.badge}</span>
+                    <div class="card-title">
+                        <span>${tmpl.title.split('：')[1] || tmpl.title}</span>
+                    </div>
+                    <p class="card-desc">${tmpl.bestFor}</p>
+                </div>
+            `).join('');
+
+            grid.querySelectorAll('.template-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const idx = parseInt(card.getAttribute('data-index'), 10);
+                    switchTemplate(idx);
+                });
+            });
+        }
+
+        // 保护数学公式解析 Pipeline
+        function renderMarkdownWithMath(md) {
+            // 提取公式，防止被 Markdown 下划线/星号破坏
+            const mathBlocks = [];
+            let safeMd = md.replace(/\$\$([\s\S]+?)\$\$/g, (match, formula) => {
+                const idx = mathBlocks.length;
+                mathBlocks.push({ type: 'block', formula });
+                return `%%KATEXBLOCK${idx}%%`;
+            });
+
+            safeMd = safeMd.replace(/\$([^\$\n]+?)\$/g, (match, formula) => {
+                const idx = mathBlocks.length;
+                mathBlocks.push({ type: 'inline', formula });
+                return `%%KATEXINLINE${idx}%%`;
+            });
+
+            // 解析 Markdown
+            let html = marked.parse(safeMd);
+
+            // 还原并渲染数学公式
+            mathBlocks.forEach((item, idx) => {
+                try {
+                    const rendered = katex.renderToString(item.formula, {
+                        displayMode: item.type === 'block',
+                        throwOnError: false
+                    });
+                    const placeholder = item.type === 'block' ? `%%KATEXBLOCK${idx}%%` : `%%KATEXINLINE${idx}%%`;
+                    html = html.split(placeholder).join(rendered);
+                } catch (e) {
+                    console.error('KaTeX render error:', e);
+                }
+            });
+
+            return html;
+        }
+
+        function switchTemplate(index) {
+            currentActiveIndex = index;
+            const tmpl = CPP_TEMPLATES[index];
+
+            // 更新卡片激活态
+            document.querySelectorAll('.template-card').forEach((c, idx) => {
+                c.classList.toggle('active', idx === index);
+            });
+
+            // 更新标题与信息
+            document.getElementById('currentTemplateBadge').textContent = index === 0 ? '⭐ 官方首推 (A+B融合)' : `模板 ${String.fromCharCode(64 + index)}`;
+            document.getElementById('currentTemplateBadge').style.background = `${tmpl.color}20`;
+            document.getElementById('currentTemplateBadge').style.color = tmpl.color;
+            document.getElementById('currentTemplateTitle').textContent = tmpl.title;
+            document.getElementById('charCount').textContent = `${tmpl.markdown.length} 字符`;
+
+            // 渲染源码
+            document.getElementById('sourceCode').textContent = tmpl.markdown;
+
+            // 渲染 HTML
+            const outputEl = document.getElementById('renderedOutput');
+            outputEl.innerHTML = renderMarkdownWithMath(tmpl.markdown);
+
+            // 代码高亮
+            outputEl.querySelectorAll('pre code').forEach((block) => {
+                const lang = block.className.replace('language-', '') || 'cpp';
+                if (Prism.languages[lang]) {
+                    block.innerHTML = Prism.highlight(block.textContent, Prism.languages[lang], lang);
+                }
+            });
+
+            // 渲染 Mermaid
+            const mermaidBlocks = outputEl.querySelectorAll('pre code.language-mermaid');
+            mermaidBlocks.forEach((codeEl, i) => {
+                const pre = codeEl.parentElement;
+                const container = document.createElement('div');
+                container.className = 'mermaid';
+                container.textContent = codeEl.textContent;
+                pre.parentNode.replaceChild(container, pre);
+            });
+            mermaid.run({ nodes: outputEl.querySelectorAll('.mermaid') });
+        }
+
+        // 绑定视图模式切换
+        document.querySelectorAll('.view-tab').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.view-tab').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const mode = btn.getAttribute('data-mode');
+                const panes = document.getElementById('contentPanes');
+                panes.className = `content-panes mode-${mode}`;
+            });
+        });
+
+        // 一键复制 Markdown
+        const copyBtn = document.getElementById('copyMarkdownBtn');
+        copyBtn.addEventListener('click', async () => {
+            const tmpl = CPP_TEMPLATES[currentActiveIndex];
+            try {
+                await navigator.clipboard.writeText(tmpl.markdown);
+                const originalHtml = copyBtn.innerHTML;
+                copyBtn.classList.remove('btn-outline');
+                copyBtn.classList.add('btn-success');
+                copyBtn.innerHTML = `
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span>已复制到剪贴板！</span>
+                `;
+                setTimeout(() => {
+                    copyBtn.className = 'btn btn-outline';
+                    copyBtn.innerHTML = originalHtml;
+                }, 2000);
+            } catch (err) {
+                alert('复制失败，请手动选取');
+            }
+        });
+
+        // 下载 .md 文件
+        document.getElementById('downloadMdBtn').addEventListener('click', () => {
+            const tmpl = CPP_TEMPLATES[currentActiveIndex];
+            const blob = new Blob([tmpl.markdown], { type: 'text/markdown;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${tmpl.id}.md`;
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+
+        // 启动渲染
+        renderSelectorCards();
+        switchTemplate(0);
+    </script>
+</body>
+</html>
